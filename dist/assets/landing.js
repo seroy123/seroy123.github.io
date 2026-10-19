@@ -41,43 +41,46 @@ preview.decode().then(() => {
   updatePlayback();
 });
 
-// MARS example video: frames have shape [360 rows, 644 columns, 3 color channels].
-const mouseVideo = document.getElementById("mabe-video");
-if (!mouseVideo) throw new Error("Missing MABe mouse-tracking preview");
-let mouseWantsPlayback = !reducedMotion.matches;
-let mouseInView = false;
-let mouseSuspended = true;
+// Each preview is a separate RGB video: [height, width, 3] per frame.
+const videoPreviews = [...document.querySelectorAll("video[data-loop-preview]")];
+if (videoPreviews.length !== 2) throw new Error("Expected vision and MABe video previews");
 
-function updateMousePlayback() {
-  mouseSuspended = document.hidden || !mouseInView || !mouseWantsPlayback;
-  if (mouseSuspended) {
-    mouseVideo.pause();
-    return;
+for (const video of videoPreviews) {
+  let wantsPlayback = !reducedMotion.matches;
+  let inView = false;
+  let suspended = true;
+
+  function updateVideoPlayback() {
+    suspended = document.hidden || !inView || !wantsPlayback;
+    if (suspended) {
+      video.pause();
+      return;
+    }
+    video.play().catch(error => {
+      // Native controls remain available when the browser blocks autoplay.
+      if (error.name !== "NotAllowedError" && error.name !== "AbortError") throw error;
+    });
   }
-  mouseVideo.play().catch(error => {
-    // Browsers may block autoplay; native controls still allow explicit playback.
-    if (error.name !== "NotAllowedError" && error.name !== "AbortError") throw error;
-  });
-}
 
-mouseVideo.addEventListener("pause", () => {
-  if (!mouseSuspended) mouseWantsPlayback = false;
-});
-mouseVideo.addEventListener("play", () => {
-  mouseWantsPlayback = true;
-  mouseSuspended = false;
-});
-new IntersectionObserver(entries => {
-  mouseInView = entries[0].isIntersecting;
-  updateMousePlayback();
-}, {threshold: 0.15}).observe(mouseVideo);
-reducedMotion.addEventListener("change", () => {
-  mouseWantsPlayback = !reducedMotion.matches;
-  updateMousePlayback();
-});
-document.addEventListener("visibilitychange", updateMousePlayback);
-window.addEventListener("pagehide", () => {
-  mouseSuspended = true;
-  mouseVideo.pause();
-});
-window.addEventListener("pageshow", updateMousePlayback);
+  video.addEventListener("pause", () => {
+    if (!suspended) wantsPlayback = false;
+  });
+  video.addEventListener("play", () => {
+    wantsPlayback = true;
+    suspended = false;
+  });
+  new IntersectionObserver(entries => {
+    inView = entries[0].isIntersecting;
+    updateVideoPlayback();
+  }, {threshold: 0.15}).observe(video);
+  reducedMotion.addEventListener("change", () => {
+    wantsPlayback = !reducedMotion.matches;
+    updateVideoPlayback();
+  });
+  document.addEventListener("visibilitychange", updateVideoPlayback);
+  window.addEventListener("pagehide", () => {
+    suspended = true;
+    video.pause();
+  });
+  window.addEventListener("pageshow", updateVideoPlayback);
+}

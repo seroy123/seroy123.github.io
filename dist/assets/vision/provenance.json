@@ -1,0 +1,8 @@
+{
+  "source": "https://github.com/facebookresearch/sam2/blob/main/demo/data/gallery/01_dog.mp4",
+  "credit": "Meta, SAM 2 demo gallery",
+  "repository_license": "https://github.com/facebookresearch/sam2/blob/main/LICENSE",
+  "changes": "Resized to 640 \u00d7 360, re-encoded as H.264, audio removed; first frame used as poster.",
+  "caption": "Illustrative description authored for this page after inspecting the clip. Not a caption produced by SAM 2 or by the Webiks project.",
+  "purpose": "Video-to-text illustration only."
+}

@@ -103,3 +103,13 @@
 @media (max-width: 800px) {
   .publications { padding-top: 36px; }
 }
+
+/* Project visuals use the same media column and readable captions. */
+.project-preview { margin: 0; min-width: 0; }
+.project-preview video, .project-preview > img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; }
+.project-preview video { background: #152c37; }
+.project-preview figcaption { margin-top: 12px; font-size: 16px; line-height: 1.6; color: var(--muted); }
+.landing-page .featured .work-context { font-size: 16px; color: var(--green); margin-bottom: 12px; }
+.example-caption { background: #eaf0e7; padding: 16px 20px; border-left: 3px solid var(--green); }
+.example-caption span { color: var(--green); font-size: 16px; font-weight: 600; }
+.landing-page .example-caption p { margin: 5px 0 0; font-size: 18px; line-height: 1.5; color: var(--ink); }

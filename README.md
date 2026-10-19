@@ -14,7 +14,7 @@ RealPDE article: https://seroy123.github.io/work/realpde/
 - Old chapter URLs redirect into the corresponding expandable section.
 - Scalar field plots are individual responsive panels; time-series charts have dedicated mobile layouts.
 - `dist/assets/realpde/`: derived figures, forecast sprites and public evidence JSON.
-- `dist/assets/landing.js`: 10 FPS RealPDE preview and looping MARS mouse-tracking video, with pause, reduced-motion and background-tab handling.
+- `dist/assets/landing.js`: 10 FPS RealPDE preview and looping vision/MARS example videos, with pause, reduced-motion and background-tab handling.
 - `dist/assets/mabe/`: credited MARS demonstration video (Segalin et al., CC BY 4.0), poster and provenance; an input-tracking illustration, not our competition predictions.
 - `dist/assets/article.js`: forecast playback, aligned crop explorer, vector-mixup slider, and 10 FPS mixup/reflection playback.
 - `.github/workflows/pages.yml`: deploys only `dist/` to GitHub Pages on pushes to `main`.
@@ -80,3 +80,5 @@ updates the website; the source and generated site are both public.
 The competition repository, Docker images, submission ZIPs and credentials are
 not part of this site. Only the reviewed site source and derived figures belong
 in its repository.
+
+The video-to-text illustration uses a credited clip from Meta’s SAM 2 demo gallery with an illustrative caption. The runtime project uses an original SVG computational-graph illustration. Neither visual reports project measurements.

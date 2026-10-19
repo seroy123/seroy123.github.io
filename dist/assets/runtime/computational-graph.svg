@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 405" role="img" aria-labelledby="title description">
+  <title id="title">Computational graph and runtime ranking illustration</title>
+  <desc id="description">A directed graph with connected operation nodes. A green path highlights configuration information flowing through the graph to three ranked output bars.</desc>
+  <defs>
+    <linearGradient id="background" x2="1" y2="1"><stop stop-color="#152c37"/><stop offset="1" stop-color="#233d36"/></linearGradient>
+    <linearGradient id="bar"><stop stop-color="#8ad9aa"/><stop offset="1" stop-color="#467d64"/></linearGradient>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#94ae9e" opacity=".14"/></pattern>
+  </defs>
+  <rect width="720" height="405" rx="0" fill="url(#background)"/>
+  <rect width="720" height="405" fill="url(#grid)"/>
+  <!-- Node positions are [x, y] pairs, arranged in four operation layers. -->
+  <g fill="none" stroke="#718c8d" stroke-width="2" opacity=".65">
+    <path d="M80 130L200 80M80 130L200 170M80 130L200 260M80 275L200 170M80 275L200 260M80 275L200 340"/>
+    <path d="M200 80L320 125M200 170L320 125M200 170L320 220M200 260L320 125M200 260L320 220M200 340L320 315"/>
+    <path d="M320 125L440 170M320 220L440 170M320 220L440 275M320 315L440 275M440 170L520 220M440 275L520 220"/>
+  </g>
+  <g fill="none" stroke="#92e5b2" stroke-width="5" stroke-linecap="round">
+    <path d="M80 130L200 170L320 220L440 170L520 220"/>
+  </g>
+  <path d="M80 55Q260 5 440 95L440 150" fill="none" stroke="#d9bf82" stroke-width="3" stroke-dasharray="7 8"/>
+  <g fill="#294650" stroke="#9db8b9" stroke-width="2">
+    <circle cx="80" cy="275" r="15"/><circle cx="200" cy="80" r="15"/><circle cx="200" cy="260" r="15"/><circle cx="200" cy="340" r="15"/>
+    <circle cx="320" cy="125" r="15"/><circle cx="320" cy="315" r="15"/><circle cx="440" cy="275" r="15"/>
+  </g>
+  <g fill="#92e5b2" stroke="#baf5ce" stroke-width="2">
+    <circle cx="80" cy="130" r="19"/><circle cx="200" cy="170" r="19"/><circle cx="320" cy="220" r="19"/><circle cx="440" cy="170" r="19"/>
+  </g>
+  <rect x="60" y="42" width="40" height="25" rx="6" fill="#d9bf82"/>
+  <path d="M515 213L523 220L515 227" fill="none" stroke="#92e5b2" stroke-width="3"/>
+  <g>
+    <rect x="546" y="148" width="143" height="144" rx="12" fill="#10292b" stroke="#49675f"/>
+    <circle cx="565" cy="181" r="5" fill="#92e5b2"/><rect x="580" y="171" width="40" height="20" rx="4" fill="url(#bar)"/>
+    <circle cx="565" cy="220" r="5" fill="#92e5b2"/><rect x="580" y="210" width="66" height="20" rx="4" fill="url(#bar)"/>
+    <circle cx="565" cy="259" r="5" fill="#92e5b2"/><rect x="580" y="249" width="88" height="20" rx="4" fill="url(#bar)"/>
+  </g>
+</svg>
