@@ -25,3 +25,32 @@
 /* Animation panels share time and color scales; controls remain independent. */
 .atlas .augmentation-strip{width:2000%;max-width:none;height:100%;image-rendering:pixelated;transform:translateX(-95%)}.augmentation-controls{margin:0 0 24px;padding-top:0;border-top:0}.mixup-grid img{margin:0;width:2000%}.mixup-window h4{font-size:20px;margin:0 0 12px}.mixup-cell{margin-bottom:16px}.mixup-cell>span{display:block;font-size:16px;margin:0 0 6px;color:var(--muted)}.reflection-demo{margin:30px 0}.reflection-legend{display:flex;gap:12px;align-items:center;justify-content:center;font-size:16px}.reflection-legend i{width:200px;height:12px;background:linear-gradient(90deg,#053061,#4393c3,#f7f7f7,#d6604d,#67001f)}
 @media(max-width:560px){.mixup-grid{grid-template-columns:1fr;gap:20px}.mixup-window{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}.mixup-window h4{grid-column:1/-1;margin:0}.mixup-cell{margin:0}.augmentation-controls label{white-space:normal}.augmentation-controls input{flex-basis:100%}}
+
+/* Landing page: one project, with the result beside its visualization. */
+.landing-page #work { padding-top: 64px; }
+.landing-page h1 {
+  margin: 0 0 44px;
+  font-size: clamp(32px, 4vw, 44px);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -1px;
+}
+.landing-page .featured { gap: 56px; padding-bottom: 80px; }
+.landing-page .flow-art { padding: 28px; }
+.landing-page .featured h2 {
+  margin: 0 0 16px;
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -.6px;
+}
+.landing-page .featured h2 a { text-decoration: none; }
+.landing-page .featured p { font-size: 19px; line-height: 1.65; margin: 0 0 16px; }
+.landing-page .featured strong { color: var(--ink); font-weight: 600; }
+.landing-page .text-link { font-size: 18px; margin-top: 4px; }
+@media (max-width: 800px) {
+  .landing-page #work { padding-top: 40px; }
+  .landing-page h1 { margin-bottom: 30px; }
+  .landing-page .featured { gap: 28px; padding-bottom: 48px; }
+  .landing-page .flow-art { padding: 20px; }
+}
