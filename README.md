@@ -6,7 +6,7 @@ RealPDE article: https://seroy123.github.io/work/realpde/
 
 ## Structure
 
-- `dist/index.html`: About me, profile links and project summaries, with an automatically looping RealPDE preview.
+- `dist/index.html`: About me, profile links, publications and project summaries, with an automatically looping RealPDE preview.
 - `dist/work/realpde/index.html`: problem statement and four synchronized forecast examples, with expandable methodology links.
 - Typography: 20px article text, minimum 16px labels, and shared desktop forecast headings.
 - Six collapsed chapters on the same page (under the plain “How we built it” heading; deep links open and scroll to them): representation, augmentation, architecture, T2 history, postprocessing and efficiency.

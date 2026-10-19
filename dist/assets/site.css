@@ -96,3 +96,10 @@
 .mabe-preview figcaption { margin-top: 12px; font-size: 16px; line-height: 1.6; color: var(--muted); }
 .landing-page .mabe-project .work-context { font-size: 16px; color: var(--green); margin-bottom: 12px; }
 .mabe-preview figcaption a { white-space: nowrap; }
+
+.publications { padding-top: 44px; border-bottom: 1px solid var(--line); }
+.publication-entry { border-top: 0; padding-top: 0; padding-bottom: 36px; }
+.publication-entry h3 a { text-decoration: none; }
+@media (max-width: 800px) {
+  .publications { padding-top: 36px; }
+}
