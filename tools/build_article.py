@@ -115,7 +115,7 @@ def main():
 <title>Our RealPDE solution — Roy Segal</title><link rel="stylesheet" href="../../assets/site.css"><link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml"><script src="../../assets/article.js" defer></script></head>
 <body><a class="skip" href="#article">Skip to article</a><div class="shell">
 <header class="nav"><a class="brand" href="../../">Roy Segal<span>.</span></a><nav class="nav-links" aria-label="Main navigation"><a href="../../#about">About me</a><a href="../../#work">My works</a><a class="external" href="https://github.com/seroy123">GitHub ↗</a></nav></header>
-<main><div class="article-heading"><a class="back" href="../../#work">← My works</a><p class="eyebrow" style="margin-top:32px">Team Pistachio · RealPDE</p><h1>Our RealPDE solution</h1><p class="lede">Validation forecasts and solution details.</p><p class="byline">Roy Segal · Work with Amit Aharoni · October 2026</p></div>
+<main><div class="article-heading"><a class="back" href="../../#work">← My works</a><p class="eyebrow" style="margin-top:32px">Team Pistachio · RealPDE</p><h1>Our RealPDE solution</h1><p class="lede">Validation forecasts and solution details.</p><p class="byline">Roy Segal · October 2026</p></div>
 <article class="article-body overview" id="article">{fragment}</article></main>
 <footer class="footer"><a href="#problem">↑ Back to the problem</a><span>© 2026 Roy Segal</span></footer></div></body></html>
 '''
