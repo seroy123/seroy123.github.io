@@ -54,3 +54,38 @@
   .landing-page .featured { gap: 28px; padding-bottom: 48px; }
   .landing-page .flow-art { padding: 20px; }
 }
+
+/* Portfolio text stays readable; only RealPDE has a visual preview. */
+.landing-about {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 48px;
+  padding: 64px 0 56px;
+  border-bottom: 1px solid var(--line);
+}
+.landing-page .landing-about h1 { margin: 0; font-size: 32px; }
+.landing-about p, .work-entry p { font-size: 19px; line-height: 1.7; margin: 0 0 16px; color: var(--muted); }
+.profile-links { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 24px; font-size: 17px; }
+.landing-page #work { padding-top: 44px; }
+.work-heading { font-size: 32px; line-height: 1.2; font-weight: 600; letter-spacing: -.7px; margin: 0 0 36px; }
+.work-entry { display: grid; grid-template-columns: 1fr 1.5fr; gap: 56px; padding: 36px 0; border-top: 1px solid var(--line); }
+.work-entry.current-work { border-top: 0; padding-top: 0; padding-bottom: 44px; }
+.work-entry h3 { font-size: 25px; line-height: 1.35; margin: 0; letter-spacing: -.4px; font-weight: 600; }
+.work-entry .work-context { font-size: 16px; color: var(--green); margin-bottom: 10px; }
+.landing-page .featured { padding: 40px 0; border-top: 1px solid var(--line); }
+.landing-page .featured h3 { font: 600 32px/1.2 system-ui, sans-serif; letter-spacing: -.6px; margin: 0 0 16px; }
+.landing-page .featured h3 a { text-decoration: none; }
+.landing-preview { min-width: 0; }
+.landing-preview .flow-art { display: block; }
+.landing-preview-window { display: block; aspect-ratio: 2; overflow: hidden; }
+.landing-page .preview-strip { width: 2000%; max-width: none; height: 100%; aspect-ratio: auto; object-fit: fill; }
+.preview-controls { display: flex; justify-content: flex-end; min-height: 38px; padding-top: 8px; }
+.preview-controls button { background: none; border: 0; padding: 4px 0; color: var(--muted); cursor: pointer; font-size: 16px; text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 800px) {
+  .landing-about { grid-template-columns: 1fr; gap: 22px; padding: 36px 0; }
+  .landing-page .nav { flex-wrap: wrap; gap: 16px; padding: 22px 0; }
+  .landing-page .nav-links { gap: 18px; }
+  .work-entry { grid-template-columns: 1fr; gap: 18px; padding: 28px 0; }
+  .landing-page .featured { padding: 28px 0; gap: 22px; }
+  .landing-page #work { padding-top: 36px; }
+}

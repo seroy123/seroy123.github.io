@@ -6,7 +6,7 @@ RealPDE article: https://seroy123.github.io/work/realpde/
 
 ## Structure
 
-- `dist/index.html`: landing page with My works and the RealPDE project.
+- `dist/index.html`: About me, profile links and project summaries, with an automatically looping RealPDE preview.
 - `dist/work/realpde/index.html`: problem statement and four synchronized forecast examples, with expandable methodology links.
 - Typography: 20px article text, minimum 16px labels, and shared desktop forecast headings.
 - Six collapsed chapters on the same page (under the plain “How we built it” heading; deep links open and scroll to them): representation, augmentation, architecture, T2 history, postprocessing and efficiency.
@@ -14,6 +14,7 @@ RealPDE article: https://seroy123.github.io/work/realpde/
 - Old chapter URLs redirect into the corresponding expandable section.
 - Scalar field plots are individual responsive panels; time-series charts have dedicated mobile layouts.
 - `dist/assets/realpde/`: derived figures, forecast sprites and public evidence JSON.
+- `dist/assets/landing.js`: 10 FPS RealPDE preview with pause, reduced-motion and background-tab handling.
 - `dist/assets/article.js`: forecast playback, aligned crop explorer, vector-mixup slider, and 10 FPS mixup/reflection playback.
 - `.github/workflows/pages.yml`: deploys only `dist/` to GitHub Pages on pushes to `main`.
 
