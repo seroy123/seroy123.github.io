@@ -1,6 +1,8 @@
 # Roy Segal — personal AI site
 
-Source repository for `seroy123.github.io`, kept private during review. GitHub Pages is not enabled.
+Personal AI blog: https://seroy123.github.io/
+
+RealPDE article: https://seroy123.github.io/work/realpde/
 
 ## Structure
 
@@ -13,7 +15,7 @@ Source repository for `seroy123.github.io`, kept private during review. GitHub P
 - Scalar field plots are individual responsive panels; time-series charts have dedicated mobile layouts.
 - `dist/assets/realpde/`: derived figures, forecast sprites and public evidence JSON.
 - `dist/assets/article.js`: forecast playback, aligned crop explorer, vector-mixup slider, and 10 FPS mixup/reflection playback.
-- `.github/pages-workflow.yml.example`: inactive template for a future Pages deployment of `dist/`. No workflow runs on push.
+- `.github/workflows/pages.yml`: deploys only `dist/` to GitHub Pages on pushes to `main`.
 
 ## Preview
 
@@ -63,17 +65,15 @@ also distinguishes whole-configuration T1/T2 comparisons from isolated ablations
 Public evidence JSON accompanies the figures; private source references are in
 `.research/source-index.json`.
 
-Review the narrative, attribution and competition details before publication.
+Review changes to the narrative, attribution and competition details before pushing to `main`.
 Desktop/mobile browser verification is recorded in `.preview/verification.json`.
 
 ## GitHub repository
 
-Private repository: https://github.com/seroy123/seroy123.github.io
+Public repository: https://github.com/seroy123/seroy123.github.io
 
-GitHub Pages remains disabled. To publish later, review the site's intended
-visibility, activate the workflow template under `.github/workflows/pages.yml`,
-and configure Pages explicitly. Repository privacy and website access are
-separate settings.
+GitHub Pages uses the Actions workflow to publish `dist/`. A push to `main`
+updates the website; the source and generated site are both public.
 
 The competition repository, Docker images, submission ZIPs and credentials are
 not part of this site. Only the reviewed site source and derived figures belong
