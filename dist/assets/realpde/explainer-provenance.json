@@ -1,0 +1,37 @@
+{
+  "augmentation_source": {
+    "recording": "10125_0.h5",
+    "re": 10142,
+    "aoa": 0
+  },
+  "illustration_windows": [
+    [
+      0,
+      39
+    ],
+    [
+      80,
+      119
+    ]
+  ],
+  "illustration_lambda_range": [
+    0.5,
+    1
+  ],
+  "crop_area_fraction": 0.25,
+  "crop_application_probability": 0.5,
+  "crop_interpolation": "none",
+  "reflection": "Reverse row order and negate vertical velocity for both input and target",
+  "mixup": "Linear mixture of vectors before computing displayed speed; same coefficient for input and target",
+  "history_example": {
+    "id": "25425_15",
+    "re": 25482,
+    "aoa": 15,
+    "start_frame": 180
+  },
+  "uncertainty_pixel": {
+    "row": 17,
+    "column": 60,
+    "selection": "Maximum observed v standard deviation; selected without future targets"
+  }
+}

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Our RealPDE solution: real forecasts and visual explanations of the biggest improvements.">
+<title>Our RealPDE solution — Roy Segal</title><link rel="stylesheet" href="../../assets/site.css"><link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml"><script src="../../assets/article.js" defer></script></head>
+<body><a class="skip" href="#article">Skip to article</a><div class="shell">
+<header class="nav"><a class="brand" href="../../">Roy Segal<span>.</span></a><nav class="nav-links" aria-label="Main navigation"><a href="../../#work">My Work</a><a href="../../#writing">Writing</a><a href="../../#about">About</a><a class="external" href="https://github.com/seroy123">GitHub ↗</a></nav></header>
+<main><div class="article-heading"><a class="back" href="../../#work">← My Work</a><p class="eyebrow" style="margin-top:32px">Team Pistachio · RealPDE</p><h1>Our RealPDE solution</h1><p class="lede">Validation forecasts and solution details.</p><p class="byline">Roy Segal · Work with Amit Aharoni · October 2026</p></div>
+<article class="article-body overview" id="article"><h2 class="problem-title" id="problem">The Problem</h2>
+<div class="summary-intro"><p>RealPDE asks models to predict real fluid flows. Our solution forecasts <strong>20 future velocity frames from 20 observed frames</strong> on a 32 × 64 grid, together with uncertainty bounds. We train a SimVPv2/gSTA model on the released real recordings, then refine its predictions with small learned postprocessing networks.</p><p>Track 1 (T1) uses the current input window; Track 2 (T2) can also use earlier observations from the recording. The strongest T1 setup combines last-frame conditioning, locally scaled residual prediction, flow-aware augmentation, and separate final paths for point forecasts and uncertainty. <strong>T2 keeps that architecture and adds seven causal history features</strong> summarizing observations before the current window. Its weights stay fixed during inference.</p><p>The story is in the choices: what information to expose, which transformations preserve the forecasting task, and where the objectives benefit from their own capacity. Each chapter below explains the intuition, the implementation and the evidence.</p></div>
+<h2 id="forecasts">Validation forecasts</h2>
+<p class="gallery-intro">Two best and two worst validation conditions. Compare the measured flow, our T2 forecast and its error across 20 future frames.</p>
+<div id="forecast-gallery">
+        <div class="gallery-controls"><button id="forecast-play" type="button" aria-pressed="false">Play forecast</button>
+            <label for="forecast-horizon">Frame <output id="forecast-time">+1</output> / 20</label>
+            <input id="forecast-horizon" type="range" min="1" max="20" value="1" aria-label="Forecast frame, synchronized across all four examples"></div>
+        <div class="gallery-column-labels" aria-hidden="true"><span>Measured future</span><span>T2 forecast</span><span>Error</span></div>
+        <section class="forecast-case" aria-label="Best case: Re 8863, AoA 0 degrees">
+            <div class="case-heading"><h3>Re 8,863 <span>·</span> AoA 0°</h3>
+                <span class="case-rank">Best · 1/16</span></div>
+            <div class="forecast-panels"><div class="forecast-panel">
+                <span class="mobile-panel-label">Measured future</span>
+                <div class="atlas"><img class="forecast-strip"
+                    src="../../assets/realpde/8850_0-truth.png" width="1280" height="32"
+                    alt="Measured future for Re 8863, AoA 0 degrees; 20 synchronized frames."></div>
+            </div><div class="forecast-panel">
+                <span class="mobile-panel-label">T2 forecast</span>
+                <div class="atlas"><img class="forecast-strip"
+                    src="../../assets/realpde/8850_0-prediction.png" width="1280" height="32"
+                    alt="T2 forecast for Re 8863, AoA 0 degrees; 20 synchronized frames."></div>
+            </div><div class="forecast-panel">
+                <span class="mobile-panel-label">Error</span>
+                <div class="atlas"><img class="forecast-strip"
+                    src="../../assets/realpde/8850_0-error.png" width="1280" height="32"
+                    alt="Error for Re 8863, AoA 0 degrees; 20 synchronized frames."></div>
+            </div></div>
+        </section><section class="forecast-case" aria-label="Best case: Re 5028, AoA 5 degrees">
+            <div class="case-heading"><h3>Re 5,028 <span>·</span> AoA 5°</h3>
+                <span class="case-rank">Best · 2/16</span></div>
+            <div class="forecast-panels"><div class="forecast-panel">
+                <span class="mobile-panel-label">Measured future</span>
+                <div class="atlas"><img class="forecast-strip"
+                    src="../../assets/realpde/5025_5-truth.png" width="1280" height="32"
+                    alt="Measured future for Re 5028, AoA 5 degrees; 20 synchronized frames."></div>
+            </div><div class="forecast-panel">
+                <span class="mobile-panel-label">T2 forecast</span>
+                <div class="atlas"><img class="forecast-strip"
+                    src="../../assets/realpde/5025_5-prediction.png" width="1280" height="32"
+                    alt="T2 forecast for Re 5028, AoA 5 degrees; 20 synchronized frames."></div>
+            </div><div class="forecast-panel">
+                <span class="mobile-panel-label">Error</span>
+                <div class="atlas"><img class="forecast-strip"
+                    src="../../assets/realpde/5025_5-error.png" width="1280" height="32"
+                    alt="Error for Re 5028, AoA 5 degrees; 20 synchronized frames."></div>
+            </div></div>
+        </section><section class="forecast-case" aria-label="Worst case: Re 25482, AoA 15 degrees">
+            <div class="case-heading"><h3>Re 25,482 <span>·</span> AoA 15°</h3>
+                <span class="case-rank">Worst · 15/16</span></div>
+            <div class="forecast-panels"><div class="forecast-panel">
+                <span class="mobile-panel-label">Measured future</span>
+                <div class="atlas"><img class="forecast-strip"
+                    src="../../assets/realpde/25425_15-truth.png" width="1280" height="32"
+                    alt="Measured future for Re 25482, AoA 15 degrees; 20 synchronized frames."></div>
+            </div><div class="forecast-panel">
+                <span class="mobile-panel-label">T2 forecast</span>
+                <div class="atlas"><img class="forecast-strip"
+                    src="../../assets/realpde/25425_15-prediction.png" width="1280" height="32"
+                    alt="T2 forecast for Re 25482, AoA 15 degrees; 20 synchronized frames."></div>
+            </div><div class="forecast-panel">
+                <span class="mobile-panel-label">Error</span>
+                <div class="atlas"><img class="forecast-strip"
+                    src="../../assets/realpde/25425_15-error.png" width="1280" height="32"
+                    alt="Error for Re 25482, AoA 15 degrees; 20 synchronized frames."></div>
+            </div></div>
+        </section><section class="forecast-case" aria-label="Worst case: Re 25482, AoA 20 degrees">
+            <div class="case-heading"><h3>Re 25,482 <span>·</span> AoA 20°</h3>
+                <span class="case-rank">Worst · 16/16</span></div>
+            <div class="forecast-panels"><div class="forecast-panel">
+                <span class="mobile-panel-label">Measured future</span>
+                <div class="atlas"><img class="forecast-strip"
+                    src="../../assets/realpde/25425_20-truth.png" width="1280" height="32"
+                    alt="Measured future for Re 25482, AoA 20 degrees; 20 synchronized frames."></div>
+            </div><div class="forecast-panel">
+                <span class="mobile-panel-label">T2 forecast</span>
+                <div class="atlas"><img class="forecast-strip"
+                    src="../../assets/realpde/25425_20-prediction.png" width="1280" height="32"
+                    alt="T2 forecast for Re 25482, AoA 20 degrees; 20 synchronized frames."></div>
+            </div><div class="forecast-panel">
+                <span class="mobile-panel-label">Error</span>
+                <div class="atlas"><img class="forecast-strip"
+                    src="../../assets/realpde/25425_20-error.png" width="1280" height="32"
+                    alt="Error for Re 25482, AoA 20 degrees; 20 synchronized frames."></div>
+            </div></div>
+        </section>
+        <details class="read-more gallery-notes"><summary>Reading the plots &amp; selection details</summary>
+            <p>Measured future and forecast show speed on the same color scale within each condition. Error is the magnitude of the velocity-vector difference, with one scale across all four conditions. The three panels show the same spatial region.</p>
+            <div class="plot-legend"><span><i class="color-ramp speed"></i> Speed: low → high</span>
+                <span><i class="color-ramp error"></i> Error: 0 → 0.282</span></div>
+            <div class="table-wrap"><table><thead><tr><th>Condition</th><th>Speed range</th></tr></thead><tbody><tr><td>Re 8,863 · AoA 0°</td><td>0–0.150</td></tr><tr><td>Re 5,028 · AoA 5°</td><td>0–0.096</td></tr><tr><td>Re 25,482 · AoA 15°</td><td>0–0.466</td></tr><tr><td>Re 25,482 · AoA 20°</td><td>0–0.461</td></tr></tbody></table></div>
+            <p>We rank the 16 complete validation recordings by local quality without runtime, then show a median-error window from each selected recording. Re is Reynolds number; AoA is angle of attack. Both come from the recording metadata.</p>
+            <p>Forecasts use the exact submitted T2 weights. <a href="../../assets/realpde/gallery.json">Selection and inference record</a>.</p>
+        </details>
+    </div>
+<header class="process-heading" id="improvements"><h2>How we built it</h2>
+<p>Explore our process by looking at the biggest improvements</p></header>
+<details class="solution-chapter" id="representation">
+            <summary><span class="chapter-number">01</span><span>Input features and residual prediction</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
+            <div class="chapter-content"><p class="chapter-gist">Give the model a reference state, then ask it to predict the change.</p>
+<h3 id="last-frame">Last-frame conditioning and residual targets</h3>
+<p>We repeat the last observed u/v channels at every input step. Earlier frames describe motion; the last frame anchors its current position. This is already part of T1.</p>
+<div class="equation math-pair"><span>r = (y − x<sub>last</sub>) / s</span><span>ŷ = x<sub>last</sub> + s · r̂</span></div>
+<p class="caption">y: future velocity · s: local fluctuation scale · r: residual. A zero residual predicts persistence.</p>
+<div class="field-grid">
+<figure><h4>Last observed</h4><img src="../../assets/realpde/residual-last.png" alt="Last observed horizontal velocity with a speed scale" width="690" height="459"></figure>
+<figure><h4>Measured future</h4><img src="../../assets/realpde/residual-future.png" alt="Future horizontal velocity on the same scale" width="690" height="459"></figure>
+<figure><h4>Target residual</h4><img src="../../assets/realpde/residual-delta.png" alt="Signed future minus last-frame horizontal velocity" width="690" height="459"></figure>
+</div>
+<h3 id="local-scale">Local normalization and statistical features</h3>
+<div class="equation">z = (x − μ) / s</div>
+<p>Normalize each location by its recent mean and smoothed fluctuation scale. Feed those statistics back as channels, preserving the magnitude information.</p>
+<div class="field-grid">
+<figure><h4>Local mean μ</h4><img src="../../assets/realpde/normalization-mean.png" alt="Temporal mean of horizontal velocity" width="690" height="459"></figure>
+<figure><h4>Fluctuation scale s</h4><img src="../../assets/realpde/normalization-scale.png" alt="Spatially smoothed fluctuation scale" width="690" height="459"></figure>
+<figure><h4>Normalized last frame</h4><img src="../../assets/realpde/normalization-z.png" alt="Last observed horizontal velocity in local fluctuation units" width="690" height="459"></figure>
+</div>
+<details class="evidence"><summary>Experimental evidence and implementation</summary>
+<p>Residual targets and normalization are established forecasting tools; <a href="https://github.com/google-deepmind/weathernext/blob/main/weathernext/utils/normalization.py">GraphCast uses normalized residuals</a>. We combine them with repeated last-frame channels and flow-specific local statistics.</p>
+<ul><li>Earlier matched residual-target experiment: <strong>82.405 → 82.772</strong> local quality.</li><li>Compact U-Net local-scale experiment: <strong>79.504625 → 79.868741</strong>.</li></ul>
+<p>These are separate development stages, not additive gains. The last-frame concatenation comparison used different splits, so it has no isolated effect size.</p>
+<p>The 18-channel stem combines u/v, last-frame u/v, sliding mean/MAD/standard deviation, window means, and log scales at 5×5, 3×3 and 9×9 neighborhoods. The plot uses a positive scale floor; training ties that floor to fitted channel statistics.</p>
+<p class="caption">Real recording 10125_0.h5. Evidence: T1 METHOD §§2, 8.3–8.5. <a href="../../assets/realpde/explainer-provenance.json">Figure provenance</a>.</p>
+</details>
+<a class="chapter-back" href="#improvements">↑ Back to the process</a></div>
+        </details><details class="solution-chapter" id="augmentation">
+            <summary><span class="chapter-number">02</span><span>View augmentations</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
+            <div class="chapter-content"><p class="chapter-gist">We introduced cropping to address the overfitting we observed.</p>
+<p>The idea: vary the field of view so the model relies less on a fixed full-field layout and learns from local flow patterns.</p>
+<h3 id="cropping">Spatial cropping</h3>
+<div class="equation math-pair"><span>Raw field: 64 × 128</span><span>Native crop: 32 × 64</span></div>
+<p><strong>25% of the area, used in 50% of samples.</strong> Native crops expose fine local structures. Full-field stride-two views preserve global context.</p>
+<div class="interactive-crop" data-crop-explorer><div class="crop-canvases"><div><canvas id="crop-source" width="768" height="384" aria-label="Raw input field with movable crop rectangle"></canvas><span>RAW INPUT · 64 × 128</span></div><div><canvas id="crop-result" width="512" height="256" aria-label="Selected native-resolution input crop"></canvas><span>INPUT CROP · 32 × 64</span></div><div><canvas id="crop-target" width="512" height="256" aria-label="Future target with the same crop coordinates"></canvas><span>ALIGNED FUTURE TARGET</span></div></div><div class="crop-controls"><label for="crop-x">Left <output id="crop-x-label">32</output><input id="crop-x" type="range" min="0" max="64" value="32"></label><label for="crop-y">Top <output id="crop-y-label">16</output><input id="crop-y" type="range" min="0" max="32" value="16"></label></div><img id="crop-input-image" src="../../assets/realpde/crop-input.png" width="128" height="64" alt="Source measured input for the crop explorer" hidden><img id="crop-target-image" src="../../assets/realpde/crop-target.png" width="128" height="64" alt="Source measured target for the crop explorer" hidden><p class="caption">Move the crop. Inputs and targets keep the same coordinates.</p></div>
+
+<details class="evidence"><summary>Crop-size ablation</summary>
+<figure><picture><source media="(max-width: 560px)" srcset="../../assets/realpde/crop-curves-mobile.png"><img class="wide-plot" src="../../assets/realpde/crop-curves.png" alt="Native quarter-area crops outperform both milder resized-crop recipes" width="1241" height="622"></picture><figcaption>Local validation quality across training; runtime excluded.</figcaption></figure>
+<div class="table-wrap"><table><thead><tr><th>Crop recipe</th><th>Best quality</th><th>Epoch</th><th>TKE</th></tr></thead><tbody><tr><td>80–100% area + resize</td><td>81.8438</td><td>390</td><td>80.8037</td></tr><tr><td>40–70% area + resize</td><td>81.9379</td><td>395</td><td>80.8813</td></tr><tr><td>25% area · native crop</td><td>82.1057</td><td>380</td><td>81.3274</td></tr></tbody></table></div>
+<p>Same split, seed, base recipe and 400 × 800 updates. The milder crops resize with bilinear interpolation; the retained crop preserves native samples. This tests the full crop recipe, not area alone.</p>
+<p>Our quarter-area crop removes much more context than the 80–100% and 40–70% resized crops we tested, yet gave the best validation result. It keeps native samples and alternates with full-field views.</p>
+<details class="literature-note"><summary>Related work</summary>
+<p>Small crops are established in vision: <a href="https://docs.pytorch.org/vision/main/generated/torchvision.transforms.RandomResizedCrop.html">Torchvision's RandomResizedCrop</a> defaults to 8–100% of image area. Spatial cropping also appears in PDE representation learning, including <a href="https://proceedings.neurips.cc/paper_files/paper/2023/file/5c46ae130105fa012da0446126c01d1d-Paper-Conference.pdf">Mialon et al. (NeurIPS 2023)</a> and <a href="https://academic.oup.com/nsr/article/11/4/nwad336/7503933">PIANO</a>.</p>
+<p>Our experiment tests native quarter-field crops as regularization for supervised velocity forecasting. The result supports this particular recipe; those earlier works study different objectives.</p>
+</details>
+<p class="caption"><a href="../../assets/realpde/crop-evidence.json">Extracted curves and comparison details</a>.</p>
+</details>
+<h3 id="mixup">Same-recording mixup</h3>
+<div class="equation">(x̃, ỹ) = λ(x<sub>A</sub>, y<sub>A</sub>) + (1 − λ)(x<sub>B</sub>, y<sub>B</sub>)</div>
+<p>Mix two non-overlapping windows from the same recording. One coefficient blends both inputs and targets.</p>
+<div class="mixup-demo" data-mixup-explorer><div class="gallery-controls augmentation-controls"><button id="mixup-play" type="button" aria-pressed="false">Play mixup</button><label for="mixup-frame">Frame <output id="mixup-time">20</output> / 20</label><input id="mixup-frame" type="range" min="1" max="20" value="20" aria-label="Mixup sequence frame"></div><div class="mixup-grid"><div class="mixup-window"><h4>Window A</h4><div class="mixup-cell"><span>Input</span><div class="atlas"><img class="augmentation-strip" src="../../assets/realpde/mixup-a-input-sequence.png" width="1280" height="32" alt="Window A input velocity magnitude across 20 frames"></div></div><div class="mixup-cell"><span>Target</span><div class="atlas"><img class="augmentation-strip" src="../../assets/realpde/mixup-a-target-sequence.png" width="1280" height="32" alt="Window A target velocity magnitude across 20 frames"></div></div></div><div class="mixup-window"><h4>Window B</h4><div class="mixup-cell"><span>Input</span><div class="atlas"><img class="augmentation-strip" src="../../assets/realpde/mixup-b-input-sequence.png" width="1280" height="32" alt="Window B input velocity magnitude across 20 frames"></div></div><div class="mixup-cell"><span>Target</span><div class="atlas"><img class="augmentation-strip" src="../../assets/realpde/mixup-b-target-sequence.png" width="1280" height="32" alt="Window B target velocity magnitude across 20 frames"></div></div></div><div class="mixup-window"><h4>Mixed</h4><div class="mixup-cell"><span>Input</span><div class="atlas"><img id="mixup-input" class="augmentation-strip" src="../../assets/realpde/mixup-input-75-sequence.png" width="1280" height="32" alt="Mixed input velocity magnitude across 20 frames"></div></div><div class="mixup-cell"><span>Target</span><div class="atlas"><img id="mixup-target" class="augmentation-strip" src="../../assets/realpde/mixup-target-75-sequence.png" width="1280" height="32" alt="Mixed target velocity magnitude across 20 frames"></div></div></div></div>
+<label for="mixup-weight">Weight on A: <output id="mixup-label">0.75</output><input id="mixup-weight" type="range" min="50" max="100" step="5" value="75"></label>
+<p class="caption">Inputs and targets advance together. The mixing weight stays fixed during playback. All panels share a speed scale: 0–0.172.</p></div>
+<h3 id="reflection">Vertical reflection</h3>
+<div class="equation">u′(row, col) = u(H − 1 − row, col)<br>v′(row, col) = −v(H − 1 − row, col)</div>
+<div class="reflection-demo" data-reflection-explorer><div class="gallery-controls augmentation-controls"><button id="reflection-play" type="button" aria-pressed="false">Play reflection</button><label for="reflection-frame">Frame <output id="reflection-time">20</output> / 20</label><input id="reflection-frame" type="range" min="1" max="20" value="20" aria-label="Reflection sequence frame"></div><div class="field-grid"><figure><h4>Original v</h4><div class="atlas"><img class="augmentation-strip" src="../../assets/realpde/reflection-original-sequence.png" width="1280" height="32" alt="Original v across 20 observed frames"></div></figure><figure><h4>Image flip only</h4><div class="atlas"><img class="augmentation-strip" src="../../assets/realpde/reflection-wrong-sequence.png" width="1280" height="32" alt="Image flip only across 20 observed frames"></div></figure><figure><h4>Flip + negate v</h4><div class="atlas"><img class="augmentation-strip" src="../../assets/realpde/reflection-correct-sequence.png" width="1280" height="32" alt="Flip + negate v across 20 observed frames"></div></figure></div><div class="reflection-legend"><span>−0.050</span><i aria-hidden="true"></i><span>+0.050</span></div><p class="caption">The same observed frames in all three panels. Blue: negative v. Red: positive v.</p></div>
+<details class="evidence"><summary>Augmentation settings &amp; evidence</summary>
+<p><a href="https://arxiv.org/abs/1710.09412">Mixup</a> is established; selecting partners from the same recording keeps the flow condition consistent. T1 development quality was 82.054000 for same-recording mixing versus 81.983664 across recordings.</p>
+<p>T2 mixes every sample using a folded Beta(0.5, 0.5) draw. The crop studies used mixup probability 0.5 and alpha 0.2. Full-field views sample all four stride-two spatial phases.</p>
+<p>Crops and reflections stay aligned across inputs, targets and history maps. Reflecting v intervals also swaps their negated lower and upper endpoints.</p>
+<p class="caption">Real recording 10125_0.h5 · Re 10,142 · AoA 0°. <a href="../../assets/realpde/explainer-provenance.json">Figure provenance</a>.</p>
+</details>
+<a class="chapter-back" href="#improvements">↑ Back to the process</a></div>
+        </details><details class="solution-chapter" id="architecture">
+            <summary><span class="chapter-number">03</span><span>Model architecture and training losses</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
+            <div class="chapter-content"><p class="chapter-gist">Share most of the model. Give point prediction and uncertainty their own final block.</p>
+<div class="diagram"><div class="pipeline"><div class="pipeline-box">Spatial encoder + seven shared gSTA blocks</div><div class="pipeline-arrow" aria-hidden="true">↓</div><div class="split"><div class="pipeline-box">Point gSTA + decoder<small>Future velocity</small></div><div class="pipeline-box">SPS gSTA + decoder<small>Uncertainty features</small></div></div></div></div>
+<p>A sharp forecast and a useful uncertainty estimate need different features. Splitting late gives each objective capacity while keeping most computation shared.</p>
+<h3 id="objectives">Residual and fluctuation-energy losses</h3>
+<div class="equation">L<sub>point</sub> = L<sub>residual</sub> + 0.8 L<sub>TKE</sub> + 0.15 L<sub>coarse TKE</sub></div>
+<p class="caption">Selected T2 objective. TKE terms reward temporal fluctuation energy at two spatial scales.</p>
+<p>Pixelwise error alone can favor smooth forecasts. Energy terms encourage the model to retain the flow's variation; quantile and SPS losses train the uncertainty bounds.</p>
+<details class="evidence"><summary>Architecture choices &amp; experiment results</summary>
+<p>We build on <a href="https://arxiv.org/abs/2211.12509">SimVPv2/gSTA</a>: spatial encoding, temporal translation and spatial decoding. Shared features with separate task heads follow a familiar <a href="https://arxiv.org/abs/2009.09796">multi-task learning pattern</a>.</p>
+<p>The first seven translator blocks are shared; the final gSTA block and decoder are separate. The point output is detached before the interval loss. Both objectives still train the shared backbone through their own paths.</p>
+<div class="table-wrap"><table><thead><tr><th>T1 development milestone</th><th>Local quality</th></tr></thead><tbody><tr><td>SimVPv2 + joint SPS</td><td>81.971903</td></tr><tr><td>Cropping + 800 updates</td><td>82.105752</td></tr><tr><td>Dedicated late SPS path</td><td>82.151385</td></tr></tbody></table></div>
+<p>These milestones summarize complete configurations. T1 also used an MVPE loss; the selected T2 recipe omitted it. Interval training combines quantile-style supervision with a smooth direct-SPS objective.</p>
+<p class="caption">Evidence: T1 METHOD §§2, 4, 8; T2 METHOD §§2, 4–5. <a href="https://arxiv.org/abs/1905.03222">Quantile-based uncertainty background</a>.</p>
+</details>
+<a class="chapter-back" href="#improvements">↑ Back to the process</a></div>
+        </details><details class="solution-chapter" id="history">
+            <summary><span class="chapter-number">04</span><span>T2 history features</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
+            <div class="chapter-content"><p class="chapter-gist">T2 adds seven maps from earlier observations to our strongest T1 architecture. The weights stay fixed.</p>
+<div class="history-timeline"><div><strong>Past observations</strong><span>Accumulate flow statistics</span></div><b aria-hidden="true">→</b><div><strong>Predict this window</strong><span>Condition on existing history</span></div><b aria-hidden="true">→</b><div><strong>Update the state</strong><span>Add this input once</span></div></div>
+<p>The past tells us what is typical. Comparing it with the current window reveals shifts in mean flow, variability and fluctuation energy.</p>
+<div class="feature-groups"><span><b>2</b> mean differences</span><span><b>2</b> log-scale differences</span><span><b>1</b> confidence</span><span><b>2</b> energy differences</span></div>
+<div class="field-grid history-fields"><figure><h4>Mean shift · u</h4><img loading="lazy" src="../../assets/realpde/history-1.png" alt="Mean shift · u history feature map with its own color scale" width="690" height="459"></figure><figure><h4>Mean shift · v</h4><img loading="lazy" src="../../assets/realpde/history-2.png" alt="Mean shift · v history feature map with its own color scale" width="690" height="459"></figure><figure><h4>Log-scale shift · u</h4><img loading="lazy" src="../../assets/realpde/history-3.png" alt="Log-scale shift · u history feature map with its own color scale" width="690" height="459"></figure><figure><h4>Log-scale shift · v</h4><img loading="lazy" src="../../assets/realpde/history-4.png" alt="Log-scale shift · v history feature map with its own color scale" width="690" height="459"></figure><figure><h4>History confidence</h4><img loading="lazy" src="../../assets/realpde/history-5.png" alt="History confidence history feature map with its own color scale" width="690" height="459"></figure><figure><h4>Window energy · u</h4><img loading="lazy" src="../../assets/realpde/history-6.png" alt="Window energy · u history feature map with its own color scale" width="690" height="459"></figure><figure><h4>Window energy · v</h4><img loading="lazy" src="../../assets/realpde/history-7.png" alt="Window energy · v history feature map with its own color scale" width="690" height="459"></figure></div>
+<p class="caption">Actual feature maps: Re 25,482 · AoA 15° · 180 prior frames. Each map has its own scale.</p>
+<div class="equation">stem = stem<sub>T1</sub> + P<sub>linear</sub>(h) + P<sub>nonlinear</sub>(h)</div>
+<p>A small projection adds <strong>3,537 parameters</strong>—about <strong>0.018%</strong> of the T1 model.</p>
+<details class="evidence"><summary>Feature definitions and validation results</summary>
+<p>Mean and log-scale channels compare the historical flow with the current window. The energy channels use average variance <em>within</em> completed windows, separating fluctuations from changes in window means.</p>
+<p>Confidence grows with prior-frame count. Running sums keep memory fixed; state resets at recording boundaries. Future targets never enter it. Mixup uses the common prefix before both windows.</p>
+<p>Running statistics are standard. The seven-map representation and its injection into the spatial stem are our design choices: a 7→32 linear convolution plus a 7→16→32 nonlinear path, initialized as a zero correction.</p>
+<div class="table-wrap"><table><thead><tr><th>Original package</th><th>Local quality</th><th>Velocity MAE</th></tr></thead><tbody><tr><td>T1</td><td>82.509437</td><td>0.005760069</td></tr><tr><td>T2</td><td>82.713986</td><td>0.005638215</td></tr></tbody></table></div>
+<p><strong>+0.204549 quality; 2.115% lower MAE.</strong> This compares complete packages: T2 also changed mixup, precision, losses, checkpoint selection and PP caching.</p>
+<p class="caption">Same 16 validation recordings and 653 windows. Evidence: T2 METHOD §§2–4, 6, 8. <a href="../../assets/realpde/explainer-provenance.json">Figure provenance</a>.</p>
+</details>
+<a class="chapter-back" href="#improvements">↑ Back to the process</a></div>
+        </details><details class="solution-chapter" id="postprocessing">
+            <summary><span class="chapter-number">05</span><span>Prediction postprocessing</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
+            <div class="chapter-content"><p class="chapter-gist">Refine the forecast's energy and uncertainty with small learned correction networks.</p>
+<div class="process-strip"><span>Native + reflected views</span><b>→</b><span>Energy correction</span><b>→</b><span>Interval refinement</span></div>
+<p>Averaging predictions can smooth fluctuations. Four small KE networks correct the forecast; a width CNN adjusts uncertainty bounds and shifts.</p>
+<figure><picture><source media="(max-width: 560px)" srcset="../../assets/realpde/uncertainty-example-mobile.png"><img class="wide-plot" src="../../assets/realpde/uncertainty-example.png" alt="Measured future, point forecast and uncertainty interval over 20 future frames" width="1458" height="741"></picture><figcaption>Re 25,482 · AoA 15°. One pixel selected by observed-input variability.</figcaption></figure>
+<details class="evidence"><summary>Postprocessing methods and validation results</summary>
+<p>Native and vertically reflected inputs run as a packed pair. Mapping back reverses rows and negates v; interval endpoints swap under negation. At fixed T1 checkpoint weights, this TTA step improved quality <strong>82.105752 → 82.188882</strong>.</p>
+<p>The full correction stage combines midpoint blending, analytic fluctuation-energy corrections, four small KE networks, a width CNN and fitted width calibration. These are lightweight correction models, not four full forecasters.</p>
+<div class="table-wrap"><table><thead><tr><th>T2 pipeline</th><th>Before finishing stage</th><th>Final quality</th></tr></thead><tbody><tr><td>Original submission</td><td>82.485017</td><td>82.713986</td></tr><tr><td>Fresh reproduction</td><td>82.467032</td><td>82.708458</td></tr></tbody></table></div>
+<p>The original archive transferred PP from an earlier T2 model. The final training package freezes the new forecaster and fits fresh corrections on 65 optimization recordings, keeping the 16 validation recordings separate.</p>
+<p class="caption">The figure shows final bounds, not a before/after comparison. Evidence: T1 METHOD §§5–8; T2 METHOD §§4–8.</p>
+</details>
+<a class="chapter-back" href="#improvements">↑ Back to the process</a></div>
+        </details><details class="solution-chapter" id="efficiency">
+            <summary><span class="chapter-number">06</span><span>Inference optimization and reproducibility</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
+            <div class="chapter-content"><p class="chapter-gist">We optimize neural inference, postprocessing and history updates together.</p>
+<div class="process-strip"><span>Pack both views</span><b>→</b><span>BF16 + CUDA Graphs</span><b>→</b><span>FP32 outputs</span></div>
+<p>Mixed precision reduces neural computation. Graph replay reduces launch overhead. Running statistics keep history storage fixed as the recording grows.</p>
+<div class="result-tiles"><div><strong>9h 38m</strong><span>400 retained training epochs</span></div><div><strong>25m 45s</strong><span>Fresh PP fitting &amp; export</span></div><div><strong>−0.0055</strong><span>Reproduction quality difference</span></div></div>
+<details class="evidence"><summary>Runtime details &amp; reproduction evidence</summary>
+<p><a href="https://pytorch.org/blog/accelerating-pytorch-with-cuda-graphs/">CUDA Graphs</a> and mixed precision are standard tools. We adapted the fixed-shape predictor, history updates and PP to work together under graph replay. Physical statistics and returned arrays stay FP32; returned predictions own their storage.</p>
+<p>The offline Docker pipeline trains the forecaster, fits fresh PP, exports the model and checks the predictor interface. All learned components start from random initialization.</p>
+<div class="table-wrap"><table><thead><tr><th>T2 package</th><th>Local quality</th><th>Velocity MAE</th></tr></thead><tbody><tr><td>Original submission</td><td>82.713986</td><td>0.005638215</td></tr><tr><td>Fresh reproduction</td><td>82.708458</td><td>0.005650316</td></tr></tbody></table></div>
+<p>Training totaled 9h 38m 52s across two Colab sessions, including scheduled validation. PP cache generation, fitting and export took 25m 45s. These are measured stage durations, excluding downtime and recovery work.</p>
+<p class="caption">Both evaluations use the same 16 recordings and 653 windows. Evidence: T2 METHOD §§7–9 and completed-run reports.</p>
+</details>
+<a class="chapter-back" href="#improvements">↑ Back to the process</a></div>
+        </details>
+<p class="article-credit">Team Pistachio · Roy Segal &amp; Amit Aharoni · Built on <a href="https://arxiv.org/abs/2211.12509">SimVPv2/gSTA</a>.</p>
+</article></main>
+<footer class="footer"><a href="#problem">↑ Back to the problem</a><span>© 2026 Roy Segal</span></footer></div></body></html>

@@ -1,0 +1,20 @@
+{
+  "recording": "10125_0.h5",
+  "sampling": "40 initial frames, spatial stride 2, phase (0,0)",
+  "quantity": "sqrt(u*u + v*v)",
+  "shared_color_range": [
+    0,
+    0.16799115281781957
+  ],
+  "frames": {
+    "19": "observed",
+    "20": "future-1",
+    "29": "future-10",
+    "39": "future-20"
+  },
+  "images_are": "Measured recording frames, not model predictions",
+  "comparison_source": "Track 2 METHOD.md section 8, original submitted archives",
+  "t1_quality": 82.509437,
+  "t2_quality": 82.713986,
+  "comparison_scope": "Same 16 validation recordings and 653 windows; whole configurations, runtime excluded"
+}

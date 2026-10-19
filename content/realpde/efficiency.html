@@ -1,0 +1,11 @@
+<p class="chapter-gist">We optimize neural inference, postprocessing and history updates together.</p>
+<div class="process-strip"><span>Pack both views</span><b>→</b><span>BF16 + CUDA Graphs</span><b>→</b><span>FP32 outputs</span></div>
+<p>Mixed precision reduces neural computation. Graph replay reduces launch overhead. Running statistics keep history storage fixed as the recording grows.</p>
+<div class="result-tiles"><div><strong>9h 38m</strong><span>400 retained training epochs</span></div><div><strong>25m 45s</strong><span>Fresh PP fitting &amp; export</span></div><div><strong>−0.0055</strong><span>Reproduction quality difference</span></div></div>
+<details class="evidence"><summary>Runtime details &amp; reproduction evidence</summary>
+<p><a href="https://pytorch.org/blog/accelerating-pytorch-with-cuda-graphs/">CUDA Graphs</a> and mixed precision are standard tools. We adapted the fixed-shape predictor, history updates and PP to work together under graph replay. Physical statistics and returned arrays stay FP32; returned predictions own their storage.</p>
+<p>The offline Docker pipeline trains the forecaster, fits fresh PP, exports the model and checks the predictor interface. All learned components start from random initialization.</p>
+<div class="table-wrap"><table><thead><tr><th>T2 package</th><th>Local quality</th><th>Velocity MAE</th></tr></thead><tbody><tr><td>Original submission</td><td>82.713986</td><td>0.005638215</td></tr><tr><td>Fresh reproduction</td><td>82.708458</td><td>0.005650316</td></tr></tbody></table></div>
+<p>Training totaled 9h 38m 52s across two Colab sessions, including scheduled validation. PP cache generation, fitting and export took 25m 45s. These are measured stage durations, excluding downtime and recovery work.</p>
+<p class="caption">Both evaluations use the same 16 recordings and 653 windows. Evidence: T2 METHOD §§7–9 and completed-run reports.</p>
+</details>

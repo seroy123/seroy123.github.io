@@ -1,0 +1,16 @@
+<p class="chapter-gist">T2 adds seven maps from earlier observations to our strongest T1 architecture. The weights stay fixed.</p>
+<div class="history-timeline"><div><strong>Past observations</strong><span>Accumulate flow statistics</span></div><b aria-hidden="true">→</b><div><strong>Predict this window</strong><span>Condition on existing history</span></div><b aria-hidden="true">→</b><div><strong>Update the state</strong><span>Add this input once</span></div></div>
+<p>The past tells us what is typical. Comparing it with the current window reveals shifts in mean flow, variability and fluctuation energy.</p>
+<div class="feature-groups"><span><b>2</b> mean differences</span><span><b>2</b> log-scale differences</span><span><b>1</b> confidence</span><span><b>2</b> energy differences</span></div>
+{{history_panels}}
+<p class="caption">Actual feature maps: Re 25,482 · AoA 15° · 180 prior frames. Each map has its own scale.</p>
+<div class="equation">stem = stem<sub>T1</sub> + P<sub>linear</sub>(h) + P<sub>nonlinear</sub>(h)</div>
+<p>A small projection adds <strong>3,537 parameters</strong>—about <strong>0.018%</strong> of the T1 model.</p>
+<details class="evidence"><summary>Feature definitions and validation results</summary>
+<p>Mean and log-scale channels compare the historical flow with the current window. The energy channels use average variance <em>within</em> completed windows, separating fluctuations from changes in window means.</p>
+<p>Confidence grows with prior-frame count. Running sums keep memory fixed; state resets at recording boundaries. Future targets never enter it. Mixup uses the common prefix before both windows.</p>
+<p>Running statistics are standard. The seven-map representation and its injection into the spatial stem are our design choices: a 7→32 linear convolution plus a 7→16→32 nonlinear path, initialized as a zero correction.</p>
+<div class="table-wrap"><table><thead><tr><th>Original package</th><th>Local quality</th><th>Velocity MAE</th></tr></thead><tbody><tr><td>T1</td><td>82.509437</td><td>0.005760069</td></tr><tr><td>T2</td><td>82.713986</td><td>0.005638215</td></tr></tbody></table></div>
+<p><strong>+0.204549 quality; 2.115% lower MAE.</strong> This compares complete packages: T2 also changed mixup, precision, losses, checkpoint selection and PP caching.</p>
+<p class="caption">Same 16 validation recordings and 653 windows. Evidence: T2 METHOD §§2–4, 6, 8. <a href="{{asset}}explainer-provenance.json">Figure provenance</a>.</p>
+</details>

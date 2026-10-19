@@ -1,0 +1,5 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>View augmentations</title><link rel="canonical" href="../#augmentation"><script>
+const known = ["cropping", "crop-source", "crop-result", "crop-target", "crop-x-label", "crop-x", "crop-y-label", "crop-y", "crop-input-image", "crop-target-image", "mixup", "mixup-play", "mixup-time", "mixup-frame", "mixup-input", "mixup-target", "mixup-label", "mixup-weight", "reflection", "reflection-play", "reflection-time", "reflection-frame"];
+const requested = location.hash.slice(1);
+location.replace('../' + (known.includes(requested) ? '#' + requested : '#augmentation'));
+</script></head><body><p><a href="../#augmentation">Read View augmentations in the RealPDE article</a>.</p></body></html>

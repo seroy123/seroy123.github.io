@@ -1,0 +1,28 @@
+{
+  "recording": "10125_0.h5",
+  "frames": 20,
+  "mixup_windows": [
+    [
+      0,
+      39
+    ],
+    [
+      80,
+      119
+    ]
+  ],
+  "mixup_speed_range": [
+    0,
+    0.1722949594259262
+  ],
+  "reflection_v_range": [
+    -0.050425298511981964,
+    0.050425298511981964
+  ],
+  "reflection_frames": [
+    0,
+    19
+  ],
+  "fps": 10,
+  "vector_mixing_before_speed": true
+}

@@ -1,0 +1,25 @@
+<p class="chapter-gist">Give the model a reference state, then ask it to predict the change.</p>
+<h3 id="last-frame">Last-frame conditioning and residual targets</h3>
+<p>We repeat the last observed u/v channels at every input step. Earlier frames describe motion; the last frame anchors its current position. This is already part of T1.</p>
+<div class="equation math-pair"><span>r = (y − x<sub>last</sub>) / s</span><span>ŷ = x<sub>last</sub> + s · r̂</span></div>
+<p class="caption">y: future velocity · s: local fluctuation scale · r: residual. A zero residual predicts persistence.</p>
+<div class="field-grid">
+<figure><h4>Last observed</h4><img src="{{asset}}residual-last.png" alt="Last observed horizontal velocity with a speed scale"></figure>
+<figure><h4>Measured future</h4><img src="{{asset}}residual-future.png" alt="Future horizontal velocity on the same scale"></figure>
+<figure><h4>Target residual</h4><img src="{{asset}}residual-delta.png" alt="Signed future minus last-frame horizontal velocity"></figure>
+</div>
+<h3 id="local-scale">Local normalization and statistical features</h3>
+<div class="equation">z = (x − μ) / s</div>
+<p>Normalize each location by its recent mean and smoothed fluctuation scale. Feed those statistics back as channels, preserving the magnitude information.</p>
+<div class="field-grid">
+<figure><h4>Local mean μ</h4><img src="{{asset}}normalization-mean.png" alt="Temporal mean of horizontal velocity"></figure>
+<figure><h4>Fluctuation scale s</h4><img src="{{asset}}normalization-scale.png" alt="Spatially smoothed fluctuation scale"></figure>
+<figure><h4>Normalized last frame</h4><img src="{{asset}}normalization-z.png" alt="Last observed horizontal velocity in local fluctuation units"></figure>
+</div>
+<details class="evidence"><summary>Experimental evidence and implementation</summary>
+<p>Residual targets and normalization are established forecasting tools; <a href="https://github.com/google-deepmind/weathernext/blob/main/weathernext/utils/normalization.py">GraphCast uses normalized residuals</a>. We combine them with repeated last-frame channels and flow-specific local statistics.</p>
+<ul><li>Earlier matched residual-target experiment: <strong>82.405 → 82.772</strong> local quality.</li><li>Compact U-Net local-scale experiment: <strong>79.504625 → 79.868741</strong>.</li></ul>
+<p>These are separate development stages, not additive gains. The last-frame concatenation comparison used different splits, so it has no isolated effect size.</p>
+<p>The 18-channel stem combines u/v, last-frame u/v, sliding mean/MAD/standard deviation, window means, and log scales at 5×5, 3×3 and 9×9 neighborhoods. The plot uses a positive scale floor; training ties that floor to fitted channel statistics.</p>
+<p class="caption">Real recording 10125_0.h5. Evidence: T1 METHOD §§2, 8.3–8.5. <a href="{{asset}}explainer-provenance.json">Figure provenance</a>.</p>
+</details>

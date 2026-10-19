@@ -1,0 +1,11 @@
+<p class="chapter-gist">Refine the forecast's energy and uncertainty with small learned correction networks.</p>
+<div class="process-strip"><span>Native + reflected views</span><b>→</b><span>Energy correction</span><b>→</b><span>Interval refinement</span></div>
+<p>Averaging predictions can smooth fluctuations. Four small KE networks correct the forecast; a width CNN adjusts uncertainty bounds and shifts.</p>
+<figure><picture><source media="(max-width: 560px)" srcset="{{asset}}uncertainty-example-mobile.png"><img class="wide-plot" src="{{asset}}uncertainty-example.png" alt="Measured future, point forecast and uncertainty interval over 20 future frames"></picture><figcaption>Re 25,482 · AoA 15°. One pixel selected by observed-input variability.</figcaption></figure>
+<details class="evidence"><summary>Postprocessing methods and validation results</summary>
+<p>Native and vertically reflected inputs run as a packed pair. Mapping back reverses rows and negates v; interval endpoints swap under negation. At fixed T1 checkpoint weights, this TTA step improved quality <strong>82.105752 → 82.188882</strong>.</p>
+<p>The full correction stage combines midpoint blending, analytic fluctuation-energy corrections, four small KE networks, a width CNN and fitted width calibration. These are lightweight correction models, not four full forecasters.</p>
+<div class="table-wrap"><table><thead><tr><th>T2 pipeline</th><th>Before finishing stage</th><th>Final quality</th></tr></thead><tbody><tr><td>Original submission</td><td>82.485017</td><td>82.713986</td></tr><tr><td>Fresh reproduction</td><td>82.467032</td><td>82.708458</td></tr></tbody></table></div>
+<p>The original archive transferred PP from an earlier T2 model. The final training package freezes the new forecaster and fits fresh corrections on 65 optimization recordings, keeping the 16 validation recordings separate.</p>
+<p class="caption">The figure shows final bounds, not a before/after comparison. Evidence: T1 METHOD §§5–8; T2 METHOD §§4–8.</p>
+</details>

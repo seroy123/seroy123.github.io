@@ -1,0 +1,9 @@
+<h2 class="problem-title" id="problem">The Problem</h2>
+<div class="summary-intro"><p>RealPDE asks models to predict real fluid flows. Our solution forecasts <strong>20 future velocity frames from 20 observed frames</strong> on a 32 × 64 grid, together with uncertainty bounds. We train a SimVPv2/gSTA model on the released real recordings, then refine its predictions with small learned postprocessing networks.</p><p>Track 1 (T1) uses the current input window; Track 2 (T2) can also use earlier observations from the recording. The strongest T1 setup combines last-frame conditioning, locally scaled residual prediction, flow-aware augmentation, and separate final paths for point forecasts and uncertainty. <strong>T2 keeps that architecture and adds seven causal history features</strong> summarizing observations before the current window. Its weights stay fixed during inference.</p><p>The story is in the choices: what information to expose, which transformations preserve the forecasting task, and where the objectives benefit from their own capacity. Each chapter below explains the intuition, the implementation and the evidence.</p></div>
+<h2 id="forecasts">Validation forecasts</h2>
+<p class="gallery-intro">Two best and two worst validation conditions. Compare the measured flow, our T2 forecast and its error across 20 future frames.</p>
+{{gallery}}
+<header class="process-heading" id="improvements"><h2>How we built it</h2>
+<p>Explore our process by looking at the biggest improvements</p></header>
+{{chapters}}
+<p class="article-credit">Team Pistachio · Roy Segal &amp; Amit Aharoni · Built on <a href="https://arxiv.org/abs/2211.12509">SimVPv2/gSTA</a>.</p>

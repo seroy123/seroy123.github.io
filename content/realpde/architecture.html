@@ -1,0 +1,14 @@
+<p class="chapter-gist">Share most of the model. Give point prediction and uncertainty their own final block.</p>
+<div class="diagram"><div class="pipeline"><div class="pipeline-box">Spatial encoder + seven shared gSTA blocks</div><div class="pipeline-arrow" aria-hidden="true">↓</div><div class="split"><div class="pipeline-box">Point gSTA + decoder<small>Future velocity</small></div><div class="pipeline-box">SPS gSTA + decoder<small>Uncertainty features</small></div></div></div></div>
+<p>A sharp forecast and a useful uncertainty estimate need different features. Splitting late gives each objective capacity while keeping most computation shared.</p>
+<h3 id="objectives">Residual and fluctuation-energy losses</h3>
+<div class="equation">L<sub>point</sub> = L<sub>residual</sub> + 0.8 L<sub>TKE</sub> + 0.15 L<sub>coarse TKE</sub></div>
+<p class="caption">Selected T2 objective. TKE terms reward temporal fluctuation energy at two spatial scales.</p>
+<p>Pixelwise error alone can favor smooth forecasts. Energy terms encourage the model to retain the flow's variation; quantile and SPS losses train the uncertainty bounds.</p>
+<details class="evidence"><summary>Architecture choices &amp; experiment results</summary>
+<p>We build on <a href="https://arxiv.org/abs/2211.12509">SimVPv2/gSTA</a>: spatial encoding, temporal translation and spatial decoding. Shared features with separate task heads follow a familiar <a href="https://arxiv.org/abs/2009.09796">multi-task learning pattern</a>.</p>
+<p>The first seven translator blocks are shared; the final gSTA block and decoder are separate. The point output is detached before the interval loss. Both objectives still train the shared backbone through their own paths.</p>
+<div class="table-wrap"><table><thead><tr><th>T1 development milestone</th><th>Local quality</th></tr></thead><tbody><tr><td>SimVPv2 + joint SPS</td><td>81.971903</td></tr><tr><td>Cropping + 800 updates</td><td>82.105752</td></tr><tr><td>Dedicated late SPS path</td><td>82.151385</td></tr></tbody></table></div>
+<p>These milestones summarize complete configurations. T1 also used an MVPE loss; the selected T2 recipe omitted it. Interval training combines quantile-style supervision with a smooth direct-SPS objective.</p>
+<p class="caption">Evidence: T1 METHOD §§2, 4, 8; T2 METHOD §§2, 4–5. <a href="https://arxiv.org/abs/1905.03222">Quantile-based uncertainty background</a>.</p>
+</details>
