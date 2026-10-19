@@ -55,7 +55,7 @@
   .landing-page .flow-art { padding: 20px; }
 }
 
-/* Portfolio text stays readable; only RealPDE has a visual preview. */
+/* Portfolio summaries and scientific previews share one responsive layout. */
 .landing-about {
   display: grid;
   grid-template-columns: 1fr 2fr;
@@ -89,3 +89,10 @@
   .landing-page .featured { padding: 28px 0; gap: 22px; }
   .landing-page #work { padding-top: 36px; }
 }
+
+/* MABe illustration: native playback controls, with a compact source credit. */
+.mabe-preview { margin: 0; min-width: 0; }
+.mabe-preview video { display: block; width: 100%; height: auto; aspect-ratio: 644 / 360; background: #152c37; }
+.mabe-preview figcaption { margin-top: 12px; font-size: 16px; line-height: 1.6; color: var(--muted); }
+.landing-page .mabe-project .work-context { font-size: 16px; color: var(--green); margin-bottom: 12px; }
+.mabe-preview figcaption a { white-space: nowrap; }

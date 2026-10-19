@@ -40,3 +40,44 @@ preview.decode().then(() => {
   window.addEventListener("pageshow", updatePlayback);
   updatePlayback();
 });
+
+// MARS example video: frames have shape [360 rows, 644 columns, 3 color channels].
+const mouseVideo = document.getElementById("mabe-video");
+if (!mouseVideo) throw new Error("Missing MABe mouse-tracking preview");
+let mouseWantsPlayback = !reducedMotion.matches;
+let mouseInView = false;
+let mouseSuspended = true;
+
+function updateMousePlayback() {
+  mouseSuspended = document.hidden || !mouseInView || !mouseWantsPlayback;
+  if (mouseSuspended) {
+    mouseVideo.pause();
+    return;
+  }
+  mouseVideo.play().catch(error => {
+    // Browsers may block autoplay; native controls still allow explicit playback.
+    if (error.name !== "NotAllowedError" && error.name !== "AbortError") throw error;
+  });
+}
+
+mouseVideo.addEventListener("pause", () => {
+  if (!mouseSuspended) mouseWantsPlayback = false;
+});
+mouseVideo.addEventListener("play", () => {
+  mouseWantsPlayback = true;
+  mouseSuspended = false;
+});
+new IntersectionObserver(entries => {
+  mouseInView = entries[0].isIntersecting;
+  updateMousePlayback();
+}, {threshold: 0.15}).observe(mouseVideo);
+reducedMotion.addEventListener("change", () => {
+  mouseWantsPlayback = !reducedMotion.matches;
+  updateMousePlayback();
+});
+document.addEventListener("visibilitychange", updateMousePlayback);
+window.addEventListener("pagehide", () => {
+  mouseSuspended = true;
+  mouseVideo.pause();
+});
+window.addEventListener("pageshow", updateMousePlayback);

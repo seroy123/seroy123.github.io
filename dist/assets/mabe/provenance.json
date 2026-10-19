@@ -1,0 +1,11 @@
+{
+  "title": "Sample MARS output (Video 1)",
+  "authors": "Segalin et al. (2021)",
+  "article": "https://doi.org/10.7554/eLife.63720",
+  "source_page": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8631946/#video1",
+  "source_video": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/c620/8631946/729052801386/elife-63720-video1-pmcvs_normal.mp4",
+  "discovered_via": "https://www.kaggle.com/competitions/MABe-mouse-behavior-detection/discussion/609567",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "changes": "Video re-encoded as H.264 for web playback; first frame extracted as a JPEG poster. Original frame size, sequence and timing retained.",
+  "purpose": "Illustration of mouse pose tracking from the MARS publication. This is not output from the Pistachio MABe competition model."
+}
