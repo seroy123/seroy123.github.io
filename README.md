@@ -9,7 +9,7 @@ RealPDE article: https://seroy123.github.io/work/realpde/
 - `dist/index.html`: About me, profile links, publications and project summaries, with an automatically looping RealPDE preview.
 - `dist/work/realpde/index.html`: problem statement and four synchronized forecast examples, with expandable methodology links.
 - Typography: 20px article text, minimum 16px labels, and shared desktop forecast headings.
-- Six collapsed chapters on the same page (under the plain “How we built it” heading; deep links open and scroll to them): representation, augmentation, architecture, T2 history, postprocessing and efficiency.
+- Seven collapsed chapters on the same page (under the plain “How we built it” heading; deep links open and scroll to them): what the model needs to see, augmentation, architecture, learning uncertainty, T2 history, postprocessing and efficiency.
 - `content/realpde/`: editable HTML fragments; each chapter leads with a visual takeaway and keeps evidence collapsed.
 - Old chapter URLs redirect into the corresponding expandable section.
 - Scalar field plots are individual responsive panels; time-series charts have dedicated mobile layouts.
@@ -66,6 +66,10 @@ runtime settings and seed. Crop area and resampling vary together. The article
 also distinguishes whole-configuration T1/T2 comparisons from isolated ablations.
 Public evidence JSON accompanies the figures; private source references are in
 `.research/source-index.json`.
+
+The representation and uncertainty chapters include early experimental motivations,
+results and unsuccessful ablations. They distinguish historical U-Net components
+from the final SimVP recipe, and label v6/v9 scoring so their gains are not combined.
 
 Review changes to the narrative, attribution and competition details before pushing to `main`.
 Desktop/mobile browser verification is recorded in `.preview/verification.json`.

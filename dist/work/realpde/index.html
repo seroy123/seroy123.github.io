@@ -103,8 +103,12 @@
 <header class="process-heading" id="improvements"><h2>How we built it</h2>
 <p>Explore our process by looking at the biggest improvements</p></header>
 <details class="solution-chapter" id="representation">
-            <summary><span class="chapter-number">01</span><span>Input features and residual prediction</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
-            <div class="chapter-content"><p class="chapter-gist">Give the model a reference state, then ask it to predict the change.</p>
+            <summary><span class="chapter-number">01</span><span>What the model needs to see</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
+            <div class="chapter-content"><p class="chapter-gist">Make motion, a reference state, and physical scale easy for the model to use.</p>
+<p><strong>Why we explored this.</strong> Early controlled runs improved when we supplied explicit changes and summaries of the observed flow. Later, an error analysis showed that windows with stronger fluctuations also had larger forecast errors and more missed uncertainty bounds. That observation motivated normalizing by local fluctuation scale, then feeding the removed statistics back into the model. The aim was to simplify the forecasting task while keeping the physical information needed to reconstruct the flow.</p>
+<div class="feature-groups"><span><b>Motion</b> Recent changes</span><span><b>Reference</b> Last observed frame</span><span><b>Scale</b> Local flow statistics</span></div>
+<h3 id="motion-features">Make recent motion explicit</h3>
+<p>The early nnU-Net experiments added temporal differences, summaries of the current input window, and a global conditioning path. A later compact U-Net gained from five-frame sliding mean, mean absolute deviation (MAD), and standard deviation channels. These three sliding statistics remain in the final model: they expose the recent flow level and variability at each location. This is context within the observed window; <a href="#history">T2 history</a> adds information from earlier windows.</p>
 <h3 id="last-frame">Last-frame conditioning and residual targets</h3>
 <p>We repeat the last observed u/v channels at every input step. Earlier frames describe motion; the last frame anchors its current position. This is already part of T1.</p>
 <div class="equation math-pair"><span>r = (y − x<sub>last</sub>) / s</span><span>ŷ = x<sub>last</sub> + s · r̂</span></div>
@@ -122,12 +126,20 @@
 <figure><h4>Fluctuation scale s</h4><img src="../../assets/realpde/normalization-scale.png" alt="Spatially smoothed fluctuation scale" width="690" height="459"></figure>
 <figure><h4>Normalized last frame</h4><img src="../../assets/realpde/normalization-z.png" alt="Last observed horizontal velocity in local fluctuation units" width="690" height="459"></figure>
 </div>
+<h3 id="preserving-scale">Keep scale available inside the network</h3>
+<p>Supplying scale channels at the input was one step. In the earlier U-Net, we also used local means and scales to modulate features after each InstanceNorm layer, through SPADE. That improved every scored component and supported the hypothesis that normalization was suppressing useful magnitude information. SPADE was a successful U-Net experiment; the final SimVP model retains the input statistics and local-scale residual decoding.</p>
 <details class="evidence"><summary>Experimental evidence and implementation</summary>
 <p>Residual targets and normalization are established forecasting tools; <a href="https://github.com/google-deepmind/weathernext/blob/main/weathernext/utils/normalization.py">GraphCast uses normalized residuals</a>. We combine them with repeated last-frame channels and flow-specific local statistics.</p>
-<ul><li>Earlier matched residual-target experiment: <strong>82.405 → 82.772</strong> local quality.</li><li>Compact U-Net local-scale experiment: <strong>79.504625 → 79.868741</strong>.</li></ul>
-<p>These are separate development stages, not additive gains. The last-frame concatenation comparison used different splits, so it has no isolated effect size.</p>
+<div class="table-wrap"><table><thead><tr><th>Development experiment</th><th>Scoring version</th><th>Local quality</th></tr></thead><tbody><tr><td>Within-window summaries, differences and global conditioning</td><td>v6</td><td>82.1980 → 82.4290</td></tr><tr><td>Last-frame residual targets</td><td>v6</td><td>82.405 → 82.772</td></tr><tr><td>Sliding temporal mean/MAD/STD</td><td>v9</td><td>79.2417 → 79.5046</td></tr><tr><td>Local-scale normalization and residual decoding</td><td>v9</td><td>79.504625 → 79.868741</td></tr><tr><td>SPADE after InstanceNorm, over a multiscale control</td><td>v9</td><td>79.869053 → 80.256412</td></tr></tbody></table></div>
+<p>The temporal-statistics change also improved the official Codabench final by <strong>0.416149</strong>. In the subsequent validation diagnostic, observed fluctuation RMS and temporal-difference RMS had Spearman correlations of <strong>0.962</strong> and <strong>0.966</strong> with forecast-error RMS. Those associations motivated the local-scale experiment; they do not establish a causal effect by themselves.</p>
+<p>These comparisons come from separate development stages. Scoring versions and some splits changed, so the gains are not additive. The repeated-last-frame concatenation comparison used different splits and has no isolated effect size. The early global conditioning and SPADE paths belong to the historical U-Nets.</p>
 <p>The 18-channel stem combines u/v, last-frame u/v, sliding mean/MAD/standard deviation, window means, and log scales at 5×5, 3×3 and 9×9 neighborhoods. The plot uses a positive scale floor; training ties that floor to fitted channel statistics.</p>
-<p class="caption">Real recording 10125_0.h5. Evidence: T1 METHOD §§2, 8.3–8.5. <a href="../../assets/realpde/explainer-provenance.json">Figure provenance</a>.</p>
+<p class="caption">Real recording 10125_0.h5. Evidence: T1 METHOD §§2, 8.3–8.5; experiment ledger: history-conditioned point model, temporal statistics, observed-intensity diagnostic, and multiscale SPADE. <a href="../../assets/realpde/explainer-provenance.json">Figure provenance</a>.</p>
+</details>
+<details class="evidence"><summary>What did removing features teach us?</summary>
+<p>Deleting the larger summary stack did not help the early model. A minimal input replaced temporal differences, summary maps and global conditioning with raw fields plus time/x/y coordinates: best local quality fell from <strong>82.9800 to 82.4384</strong>. At a matched training budget, the full feature stack still performed better.</p>
+<p>Removing the coordinates from that minimal model helped slightly, <strong>82.4384 → 82.5063</strong>, while remaining below the full model. This supports testing which information is useful; it does not establish that coordinate removal would improve the full feature stack. These are historical v6 ablations.</p>
+<p class="caption">Evidence: experiment ledger, “Minimal-input ablations” (4 August 2026).</p>
 </details>
 <a class="chapter-back" href="#improvements">↑ Back to the process</a></div>
         </details><details class="solution-chapter" id="augmentation">
@@ -183,8 +195,36 @@
 <p class="caption">Evidence: T1 METHOD §§2, 4, 8; T2 METHOD §§2, 4–5. <a href="https://arxiv.org/abs/1905.03222">Quantile-based uncertainty background</a>.</p>
 </details>
 <a class="chapter-back" href="#improvements">↑ Back to the process</a></div>
+        </details><details class="solution-chapter" id="uncertainty">
+            <summary><span class="chapter-number">04</span><span>Learning uncertainty</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
+            <div class="chapter-content"><p class="chapter-gist">Learn bounds that adapt to the observed flow and reward useful precision.</p>
+<p><strong>Why we explored this.</strong> Our early calibration experiments showed that forecast errors carried structure: conditioning residual distributions on motion improved their bounds, and local spatial context helped further. The widest intervals covered more targets, yet did not earn the best SPS score. Those results supported two choices: let the input determine the uncertainty, and train for the score's balance between containing the target and keeping the interval narrow.</p>
+<div class="process-strip"><span>Observe the flow</span><b aria-hidden="true">→</b><span>Predict error bounds</span><b aria-hidden="true">→</b><span>Optimize interval quality</span></div>
+<h3 id="flow-dependent-bounds">Let uncertainty depend on the flow</h3>
+<p>The first reference used one fixed residual interval per forecast horizon and velocity component. A small neighbor-aware convolutional model could instead use the local flow context to predict asymmetric bounds. We trained lower and upper residual quantiles, then calibrated them with conformalized quantile regression (CQR).</p>
+<div class="equation">Interval = ŷ + [δ<sub>low</sub>(x), δ<sub>high</sub>(x)]</div>
+<p class="caption">ŷ: point forecast · x: observed flow context · δ: learned lower and upper point-error offsets.</p>
+<h3 id="uncertainty-objective">Train for useful bounds</h3>
+<p>SPS rewards intervals that contain the target while penalizing excessive width, with a multiplier for forecast accuracy. We kept quantile training and added a smooth approximation of this objective. Smooth interval-membership functions supplied gradients; evaluation still used the hard scorer. With the original inputs held fixed, direct-SPS training improved over CQR alone. Adding input-window summaries and a longer fit improved it further.</p>
+<details class="evidence"><summary>Early calibration experiments and what they showed</summary>
+<p>In the first benchmark, the point forecaster was frozen. Calibration used trajectory-group folds; the following are held-out validation results under the early <strong>v6</strong> scoring protocol.</p>
+<div class="table-wrap"><table><thead><tr><th>Interval model</th><th>SPS</th><th>Coverage</th><th>Mean half-width</th></tr></thead><tbody><tr><td>Constant per horizon/channel</td><td>59.856</td><td>75.2%</td><td>0.00941</td></tr><tr><td>Neighbor convolution, Gaussian likelihood</td><td>60.430</td><td>91.1%</td><td>0.01857</td></tr><tr><td>Neighbor convolution, asymmetric CQR</td><td>61.257</td><td>89.7%</td><td>0.01284</td></tr></tbody></table></div>
+<p>CQR improved local four-metric quality from <strong>82.275 to 82.626</strong> over the constant reference. It also beat the Gaussian head's SPS while using narrower intervals. A separate residual-histogram experiment found that motion conditioning supplied most of its gain, with spatial localization adding less.</p>
+<p>The next comparison used a later fixed point checkpoint and a 20% calibration partition. It is a separate benchmark, also scored with v6.</p>
+<div class="table-wrap"><table><thead><tr><th>Width-24 interval head</th><th>Validation SPS</th></tr></thead><tbody><tr><td>Original 13 inputs, CQR</td><td>61.532</td></tr><tr><td>Same inputs, 8 direct-SPS epochs</td><td>61.903</td></tr><tr><td>Full input summaries, 64 direct-SPS epochs</td><td>62.210</td></tr><tr><td>Full-input recipe, second seed</td><td>62.211</td></tr></tbody></table></div>
+<p>The same-input comparison supports direct-SPS training. The full-input result combines richer features and a longer fit. These early v6 SPS values should not be compared directly with later v9 results.</p>
+<p class="caption">Evidence: T1 METHOD §8.2; experiment ledger: frozen-forecaster calibration benchmark, local highest-density intervals, and direct SPS optimization.</p>
+</details>
+<h3 id="joint-uncertainty">Give uncertainty its own learned features</h3>
+<p>Later experiments trained the forecaster and interval head together, allowing uncertainty training to influence their shared representation. The final SimVP model carries this direction forward with a <a href="#architecture">dedicated late SPS path</a>, followed by <a href="#postprocessing">learned interval refinement</a>. The early standalone calibration heads were steps toward that design.</p>
+<details class="evidence"><summary>Joint-training result under the later scoring protocol</summary>
+<p>Under <strong>v9</strong>, a train-only CQR head on a frozen backbone scored validation SPS <strong>42.7046</strong> and local quality <strong>78.4211</strong>. A joint model trained from random initialization reached <strong>46.1662 SPS</strong> and <strong>78.9916 quality</strong>. Calibration selected its epoch and validation remained untouched.</p>
+<p>This compares training recipes, including their budgets and objectives. It supports the joint-training direction without isolating a single architectural change.</p>
+<p class="caption">Evidence: T1 METHOD §8.4; experiment ledger, “Train-only SPS and end-to-end joint training” (9 August 2026).</p>
+</details>
+<a class="chapter-back" href="#improvements">↑ Back to the process</a></div>
         </details><details class="solution-chapter" id="history">
-            <summary><span class="chapter-number">04</span><span>T2 history features</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
+            <summary><span class="chapter-number">05</span><span>T2 history features</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
             <div class="chapter-content"><p class="chapter-gist">T2 adds seven maps from earlier observations to our strongest T1 architecture. The weights stay fixed.</p>
 <div class="history-timeline"><div><strong>Past observations</strong><span>Accumulate flow statistics</span></div><b aria-hidden="true">→</b><div><strong>Predict this window</strong><span>Condition on existing history</span></div><b aria-hidden="true">→</b><div><strong>Update the state</strong><span>Add this input once</span></div></div>
 <p>The past tells us what is typical. Comparing it with the current window reveals shifts in mean flow, variability and fluctuation energy.</p>
@@ -203,7 +243,7 @@
 </details>
 <a class="chapter-back" href="#improvements">↑ Back to the process</a></div>
         </details><details class="solution-chapter" id="postprocessing">
-            <summary><span class="chapter-number">05</span><span>Prediction postprocessing</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
+            <summary><span class="chapter-number">06</span><span>Prediction postprocessing</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
             <div class="chapter-content"><p class="chapter-gist">Refine the forecast's energy and uncertainty with small learned correction networks.</p>
 <div class="process-strip"><span>Native + reflected views</span><b>→</b><span>Energy correction</span><b>→</b><span>Interval refinement</span></div>
 <p>Averaging predictions can smooth fluctuations. Four small KE networks correct the forecast; a width CNN adjusts uncertainty bounds and shifts.</p>
@@ -217,7 +257,7 @@
 </details>
 <a class="chapter-back" href="#improvements">↑ Back to the process</a></div>
         </details><details class="solution-chapter" id="efficiency">
-            <summary><span class="chapter-number">06</span><span>Inference optimization and reproducibility</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
+            <summary><span class="chapter-number">07</span><span>Inference optimization and reproducibility</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
             <div class="chapter-content"><p class="chapter-gist">We optimize neural inference, postprocessing and history updates together.</p>
 <div class="process-strip"><span>Pack both views</span><b>→</b><span>BF16 + CUDA Graphs</span><b>→</b><span>FP32 outputs</span></div>
 <p>Mixed precision reduces neural computation. Graph replay reduces launch overhead. Running statistics keep history storage fixed as the recording grows.</p>

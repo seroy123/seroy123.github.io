@@ -6,11 +6,13 @@ import struct
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+# PAGES: list of (URL slug, chapter title, description) string triples.
 PAGES = [
     ('index', 'Our RealPDE solution', 'A compact overview, real forecasts, and the experiments behind each improvement.'),
-    ('representation', 'Input features and residual prediction', 'Last-frame conditioning, residual targets, and local flow statistics.'),
+    ('representation', 'What the model needs to see', 'Motion, reference frames, and the physical scale that normalization can hide.'),
     ('augmentation', 'View augmentations', 'Why a small native crop helped, how we mixed windows, and what the ablations showed.'),
     ('architecture', 'Model architecture and training losses', 'The SimVPv2 backbone, metric-aware objectives, and a dedicated uncertainty path.'),
+    ('uncertainty', 'Learning uncertainty', 'Why flow-dependent error bounds and direct SPS training improved uncertainty estimates.'),
     ('history', 'T2 history features', 'How Track 2 adds causal context to the strongest Track 1 architecture.'),
     ('postprocessing', 'Prediction postprocessing', 'Reflected views, fluctuation-energy corrections, and learned interval widths.'),
     ('efficiency', 'Inference optimization and reproducibility', 'Fast inference, training from scratch, and evidence that the package reproduces the result.'),
@@ -133,7 +135,7 @@ const requested = location.hash.slice(1);
 location.replace('../' + (known.includes(requested) ? '#' + requested : '#{slug}'));
 </script></head><body><p><a href="../#{slug}">Read {escape(title)} in the RealPDE article</a>.</p></body></html>'''
         (folder / 'index.html').write_text(redirect)
-    print('Built one article with six expandable chapters and six legacy redirects.')
+    print(f'Built one article with {len(PAGES) - 1} expandable chapters and chapter redirects.')
 
 
 if __name__ == '__main__':
