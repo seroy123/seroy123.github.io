@@ -1,0 +1,140 @@
+{
+  "scope": "Recovered architecture training histories; results reviewed 2026-10-25",
+  "metric": "Best saved local validation quality_without_time; higher is better; excludes runtime",
+  "limits": [
+    "Recipes and training budgets differ; this is not a controlled architecture ranking.",
+    "Partial histories are inconclusive and do not establish why a run ended.",
+    "Saved epochs come from history.json; planned budgets come from run_config.json runtime, not stale recipe defaults.",
+    "Scores are local validation results, not official leaderboard results."
+  ],
+  "trials": [
+    {
+      "name": "ConvNeXt U-Net + dedicated uncertainty path",
+      "architecture": "convnext_unet_dedicated_sps",
+      "saved_through_epoch": 400,
+      "planned_epochs": 400,
+      "best_epoch": 390,
+      "best_quality_without_time": 82.02986932422456,
+      "steps_per_epoch": 800,
+      "history_covers_configured_budget": true
+    },
+    {
+      "name": "SimVP + parallel Fourier/FNO adapter",
+      "architecture": "simvp_v2_gsta_parallel_fno",
+      "saved_through_epoch": 400,
+      "planned_epochs": 400,
+      "best_epoch": 400,
+      "best_quality_without_time": 81.74352883315967,
+      "steps_per_epoch": 400,
+      "history_covers_configured_budget": true
+    },
+    {
+      "name": "SwinUNETR 15M",
+      "architecture": "swin_unetr_15m",
+      "saved_through_epoch": 400,
+      "planned_epochs": 400,
+      "best_epoch": 400,
+      "best_quality_without_time": 81.35394353908387,
+      "steps_per_epoch": 400,
+      "history_covers_configured_budget": true
+    },
+    {
+      "name": "CNO3D + dedicated uncertainty path",
+      "architecture": "cno3d_dedicated_sps",
+      "saved_through_epoch": 11,
+      "planned_epochs": 1000,
+      "best_epoch": 10,
+      "best_quality_without_time": 72.2275686758844,
+      "steps_per_epoch": 400,
+      "history_covers_configured_budget": false
+    },
+    {
+      "name": "SimVP + Legendre multiwavelet translator",
+      "architecture": "simvp_mwt_legendre",
+      "saved_through_epoch": 105,
+      "planned_epochs": 400,
+      "best_epoch": 105,
+      "best_quality_without_time": 80.04014210890251,
+      "steps_per_epoch": 400,
+      "history_covers_configured_budget": false
+    },
+    {
+      "name": "SimVP + jointly trained WDNO refiner",
+      "architecture": "simvp_wdno_residual",
+      "saved_through_epoch": 130,
+      "planned_epochs": 400,
+      "best_epoch": 110,
+      "best_quality_without_time": 79.81035155233022,
+      "steps_per_epoch": 400,
+      "history_covers_configured_budget": false
+    },
+    {
+      "name": "ConvTT-LSTM 15M",
+      "architecture": "conv_tt_lstm_15m",
+      "saved_through_epoch": 5,
+      "planned_epochs": 400,
+      "best_epoch": 5,
+      "best_quality_without_time": 75.17537167838094,
+      "steps_per_epoch": 400,
+      "history_covers_configured_budget": false
+    },
+    {
+      "name": "Frozen SimVP + WDNO EMA refiner",
+      "architecture": "simvp_wdno_residual",
+      "saved_through_epoch": 390,
+      "planned_epochs": 400,
+      "best_epoch": 390,
+      "best_quality_without_time": 81.80783564088844,
+      "steps_per_epoch": 400,
+      "history_covers_configured_budget": false,
+      "base_quality_at_best_refined_epoch": 81.81227177668008,
+      "refined_minus_base_at_best_refined_epoch": -0.00443613579163582,
+      "maximum_refined_minus_base_in_history": 0.004607991941398382,
+      "correction_gate_at_best_refined_epoch": 0.010994134470820427
+    },
+    {
+      "name": "WDNO metric-aware fine-tuning",
+      "architecture": "simvp_wdno_residual",
+      "saved_through_epoch": 65,
+      "planned_epochs": 100,
+      "best_epoch": 1,
+      "best_quality_without_time": 81.85246033267774,
+      "steps_per_epoch": 400,
+      "history_covers_configured_budget": false,
+      "base_quality_at_best_refined_epoch": 81.85246033267774,
+      "refined_minus_base_at_best_refined_epoch": 0,
+      "maximum_refined_minus_base_in_history": 0,
+      "correction_gate_at_best_refined_epoch": 0
+    },
+    {
+      "name": "Small TAU",
+      "architecture": "tau_small",
+      "saved_through_epoch": 405,
+      "planned_epochs": 600,
+      "best_epoch": 400,
+      "best_quality_without_time": 81.6119074173227,
+      "steps_per_epoch": 400,
+      "history_covers_configured_budget": false
+    },
+    {
+      "name": "gSTA + TAU concatenation",
+      "architecture": "gsta_tau_concat",
+      "saved_through_epoch": 260,
+      "planned_epochs": 400,
+      "best_epoch": 260,
+      "best_quality_without_time": 81.39674837844963,
+      "steps_per_epoch": 400,
+      "history_covers_configured_budget": false
+    },
+    {
+      "name": "PFGNet",
+      "architecture": "pfgnet",
+      "saved_through_epoch": 10,
+      "planned_epochs": 600,
+      "best_epoch": 5,
+      "best_quality_without_time": 79.54313672395195,
+      "steps_per_epoch": 400,
+      "history_covers_configured_budget": false
+    }
+  ]
+}

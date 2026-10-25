@@ -16,6 +16,7 @@ PAGES = [
     ('history', 'T2 history features', 'How Track 2 adds causal context to the strongest Track 1 architecture.'),
     ('postprocessing', 'Prediction postprocessing', 'Reflected views, fluctuation-energy corrections, and learned interval widths.'),
     ('efficiency', 'Inference optimization and reproducibility', 'Fast inference, training from scratch, and evidence that the package reproduces the result.'),
+    ('what-didnt-work', 'What didn’t work', 'Features, architectures, and augmentations that fell short or remain inconclusive.'),
 ]
 
 
