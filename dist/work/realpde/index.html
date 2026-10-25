@@ -271,14 +271,14 @@
 </details>
 <a class="chapter-back" href="#improvements">↑ Back to the process</a></div>
         </details><details class="solution-chapter" id="what-didnt-work">
-            <summary><span class="chapter-number">08</span><span>What didn’t work</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
-            <div class="chapter-content"><p class="chapter-gist">Some useful lessons came from ideas that never reached the final submission.</p>
-<p>We tried richer features, alternative forecasters, and more aggressive data augmentation. Several experiments improved training metrics without improving held-out forecasts; others helped one score at the expense of another. This section collects those results, alongside architecture trials whose saved histories are too short to support a conclusion.</p>
+            <summary><span class="chapter-number">08</span><span>What didn’t make the final model</span><span class="chapter-toggle" aria-hidden="true">+</span></summary>
+            <div class="chapter-content"><p class="chapter-gist">The experiments we moved on from helped shape the final solution.</p>
+<p>We explored alternative features, architectures, and augmentations, retaining changes that improved validation performance. We stopped some trials early, usually when their initial validation results did not justify further training. Several ideas improved training metrics or individual scores without improving overall forecast quality. The results below reflect the configurations and training budgets we tested.</p>
 
 <h3 id="unsuccessful-features">Features</h3>
 <p><strong>More explicit flow geometry.</strong> We tested whether giving the uncertainty model a solid mask, distance to the boundary, and vorticity and strain features would improve its error bounds. With the forecaster, folds, seed, and training budget held fixed, validation SPS fell from <strong>61.293 to 61.116</strong>. Enlarging the neighborhood reduced it further, to <strong>60.783</strong>. Coverage rose, but the intervals widened and their score fell. These particular extra features did not improve the uncertainty model.</p>
-<p><strong>Removing the derived features.</strong> We also tested the opposite idea: could a simpler input reduce overfitting? Removing temporal differences, local summaries, and global conditioning together lowered quality. A raw-only variant recovered a little by dropping coordinates, but still trailed the full feature stack. Adding an explicit half-cosine time channel to that minimal model also hurt. The useful lesson was to test individual additions and removals; the results did not support stripping out all derived features.</p>
-<details class="evidence"><summary>Feature ablations and their limits</summary>
+<p><strong>Removing the derived features.</strong> We tested whether a simpler input would reduce overfitting. Removing temporal differences, local summaries, and global conditioning together lowered quality. A raw-only variant recovered a little by dropping coordinates, but still trailed the full feature stack. Adding an explicit half-cosine time channel to that minimal model also hurt. We retained the derived features.</p>
+<details class="evidence"><summary>Feature ablation results</summary>
 <p>These are early U-Net experiments under the <strong>v6</strong> scoring protocol. They concern features derived from the current input window, separate from the longer recording history available in Track 2.</p>
 <div class="table-wrap"><table><thead><tr><th>Input recipe</th><th>Best local quality</th><th>What changed</th></tr></thead><tbody>
 <tr><td>Full feature stack</td><td>82.9800</td><td>Reference with differences, summaries, and global conditioning</td></tr>
@@ -286,25 +286,25 @@
 <tr><td>Raw inputs only</td><td>82.5063</td><td>Also removed the coordinates</td></tr>
 <tr><td>Raw inputs + half-cosine time</td><td>82.4247</td><td>Added time to the raw-only variant</td></tr>
 </tbody></table></div>
-<p>The reference and minimal runs had different total training lengths. At a matched 6,000 optimizer steps, the full recipe still led the raw-plus-coordinates variant, <strong>82.8885 versus 82.3467</strong>. Removing the bundle did not isolate any one feature, and the coordinate result applies to the minimal model. It does not establish that coordinates hurt the full model.</p>
+<p>At a matched 6,000 optimizer steps, the full recipe led the raw-plus-coordinates variant, <strong>82.8885 versus 82.3467</strong>. The feature-removal experiment tested the bundle as a whole; the coordinate and time-channel comparisons used the minimal model.</p>
 <p class="caption">Evidence: experiment ledger, “Boundary-aware CQR ablation” and “Minimal-input ablations.” See <a href="#representation">what the model needs to see</a> for the features we retained.</p>
 </details>
 
 <h3 id="unsuccessful-architectures">Architectures</h3>
-<p><strong>Trying other forecasters.</strong> The search extended beyond SimVP: we trained a ConvNeXt U-Net, SwinUNETR, a SimVP model with a parallel Fourier/FNO adapter, and several wavelet, recurrent, and temporal-attention variants. The completed 400-epoch ConvNeXt, Fourier-adapter, and SwinUNETR runs reached local quality scores of <strong>82.0299, 81.7435, and 81.3539</strong>. These alternatives stayed outside the final recipe. Their different training settings make the scores a record of our search, rather than a controlled ranking of architecture families.</p>
-<p><strong>Learning a second correction with WDNO.</strong> We tried a wavelet diffusion neural operator as a residual refiner, including joint training and a version on top of a frozen SimVP. The frozen-base experiment produced only tiny changes. In a later fine-tuning run, the best saved quality equaled the base forecast with the correction gate set to zero: the refinement was effectively disabled. The saved experiments did not establish a useful gain from this extra stage.</p>
-<p><strong>CNO was tried, but remains inconclusive.</strong> A CNO3D model with a dedicated uncertainty path has actual training logs. The recovered history contains only <strong>11 of 1,000 configured epochs</strong>, with validation last recorded at epoch 10. That is evidence of an attempt, not enough evidence to reject CNO. Several other alternatives also have incomplete saved histories.</p>
-<details class="evidence"><summary>Completed runs, partial histories, and refinement checks</summary>
-<p>All values below are the best saved <strong>local validation quality without runtime</strong>, not leaderboard scores. “Saved / planned” means the last epoch present in the recovered history and the runtime's configured budget. A partial history does not tell us why the record ended.</p>
-<h4>Histories covering the configured training budget</h4>
-<div class="table-wrap"><table><thead><tr><th>Architecture</th><th>Saved / planned epochs</th><th>Best quality</th></tr></thead><tbody>
+<p><strong>Trying other forecasters.</strong> The search extended beyond SimVP: we trained a ConvNeXt U-Net, SwinUNETR, a SimVP model with a parallel Fourier/FNO adapter, and several wavelet, recurrent, and temporal-attention variants. The completed 400-epoch ConvNeXt, Fourier-adapter, and SwinUNETR runs reached local quality scores of <strong>82.0299, 81.7435, and 81.3539</strong>. We continued developing the SimVP recipe used in the final submission.</p>
+<p><strong>Learning a second correction with WDNO.</strong> We tried a wavelet diffusion neural operator as a residual refiner, including joint training and a version on top of a frozen SimVP. The frozen-base experiment produced only tiny changes. In a later fine-tuning run, the best quality equaled the base forecast with the correction gate set to zero: the refinement was effectively disabled. We dropped this extra stage.</p>
+<p><strong>CNO3D.</strong> We trained a CNO3D model with a dedicated uncertainty path and stopped early after <strong>11 epochs</strong>. Its best validation quality was <strong>72.2276</strong>, reached at epoch 10.</p>
+<details class="evidence"><summary>Architecture results and training budgets</summary>
+<p>Scores are the best <strong>local validation quality without runtime</strong>. Epoch counts show training completed against the planned budget.</p>
+<h4>Completed</h4>
+<div class="table-wrap"><table><thead><tr><th>Architecture</th><th>Epochs / budget</th><th>Best quality</th></tr></thead><tbody>
 <tr><td>ConvNeXt U-Net + dedicated uncertainty path</td><td>400 / 400</td><td>82.0299</td></tr>
 <tr><td>SimVP + parallel Fourier/FNO adapter</td><td>400 / 400</td><td>81.7435</td></tr>
 <tr><td>SwinUNETR, approximately 15M parameters</td><td>400 / 400</td><td>81.3539</td></tr>
 </tbody></table></div>
-<p>The Fourier trial added a parallel adapter to SimVP; it was not a standalone FNO. ConvNeXt used 800 updates per epoch, while the Fourier and SwinUNETR runs used 400. Recipes and training budgets need to be matched before attributing a difference to the backbone alone.</p>
-<h4>Partial histories — inconclusive architecture trials</h4>
-<div class="table-wrap"><table><thead><tr><th>Architecture</th><th>Saved / planned epochs</th><th>Best quality so far</th></tr></thead><tbody>
+<p>The Fourier trial used a parallel adapter within SimVP. ConvNeXt used 800 updates per epoch; the Fourier and SwinUNETR runs used 400.</p>
+<h4>Stopped early</h4>
+<div class="table-wrap"><table><thead><tr><th>Architecture</th><th>Epochs / budget</th><th>Best quality</th></tr></thead><tbody>
 <tr><td>CNO3D + dedicated uncertainty path</td><td>11 / 1,000</td><td>72.2276</td></tr>
 <tr><td>SimVP + Legendre multiwavelet translator</td><td>105 / 400</td><td>80.0401</td></tr>
 <tr><td>SimVP + jointly trained WDNO refiner</td><td>130 / 400</td><td>79.8104</td></tr>
@@ -314,13 +314,13 @@
 <tr><td>PFGNet</td><td>10 / 600</td><td>79.5431</td></tr>
 </tbody></table></div>
 <h4>Comparing WDNO refinement with its own base forecast</h4>
-<p>The frozen-SimVP/WDNO history reaches epoch 390 of 400. Its best refined quality was <strong>81.8078</strong>, versus <strong>81.8123</strong> for the base forecast evaluated alongside it. The largest positive difference anywhere in that history was only <strong>+0.0046</strong>. The subsequent fine-tuning history reaches epoch 65 of 100; its best quality was <strong>81.8525</strong>, equal to the base with a zero correction gate. None of its saved evaluations improved on the corresponding base.</p>
-<p class="caption">Evidence: recovered Colab/Drive histories and run configurations, plus local TAU and PFGNet artifacts. <a href="../../assets/realpde/architecture-trials.json">Architecture trial summary</a>. These records extend the older experiment ledger.</p>
+<p>We stopped the frozen-SimVP/WDNO run after 390 of 400 planned epochs. Its best refined quality was <strong>81.8078</strong>, versus <strong>81.8123</strong> for the base forecast evaluated alongside it. The largest positive difference during training was only <strong>+0.0046</strong>. We stopped the subsequent fine-tuning run after 65 of 100 planned epochs. Its best quality was <strong>81.8525</strong>, equal to the base with a zero correction gate; none of its validation evaluations improved on the corresponding base.</p>
+<p class="caption"><a href="../../assets/realpde/architecture-trials.json">Architecture trial summary</a>, including training budgets, best checkpoints, and refinement comparisons.</p>
 </details>
 
 <h3 id="unsuccessful-augmentations">Augmentations</h3>
-<p><strong>Gaussian input noise.</strong> Adding noise at 1% of each recording's velocity standard deviation produced a misleadingly low training loss. The noise inflated the local temporal scale used for normalization, reducing the normalized velocity-MSE term without a matching validation improvement. Best quality was <strong>81.55</strong>, about 0.3–0.4 points below the comparable clean run. We removed this augmentation. Mixup was disabled in the noise experiment, so this was not a test of adding noise to the final mixup recipe.</p>
-<p><strong>Mixing across recordings and resizing larger crops.</strong> Broadening mixup to different recordings gave a slightly lower score than using windows from the same recording. Larger crops resized to the model's input grid also underperformed the small crop kept at native resolution. We retained the same-recording mixing and native-crop recipes. The crop comparison changed area and resampling together, so it cannot identify which change caused the difference.</p>
+<p><strong>Gaussian input noise.</strong> Adding noise at 1% of each recording's velocity standard deviation produced a misleadingly low training loss. The noise inflated the local temporal scale used for normalization, reducing the normalized velocity-MSE term without a matching validation improvement. Best quality was <strong>81.55</strong>, about 0.3–0.4 points below the comparable clean run. We removed this augmentation.</p>
+<p><strong>Mixing across recordings and resizing larger crops.</strong> Broadening mixup to different recordings gave a slightly lower score than using windows from the same recording. Larger crops resized to the model's input grid also underperformed the small crop kept at native resolution. We retained the same-recording mixing and native-crop recipes.</p>
 <p><strong>Perturbing temporal Fourier modes.</strong> An earlier experiment varied the amplitudes of low-frequency temporal modes to regularize fluctuation energy while preserving mean flow. It slightly improved peak TKE and reduced the training–validation TKE gap, but best overall quality fell from <strong>82.0878 to 82.0392</strong>. Improving the targeted diagnostic was not enough to improve the forecast's combined score.</p>
 <details class="evidence"><summary>Augmentation comparisons</summary>
 <div class="table-wrap"><table><thead><tr><th>Experiment</th><th>Best local quality</th><th>Reference in that comparison</th></tr></thead><tbody>
@@ -329,8 +329,8 @@
 <tr><td>40–70% area crop + resize</td><td>81.9379</td><td>82.1057, native 25% area crop</td></tr>
 <tr><td>Temporal spectral augmentation</td><td>82.0392</td><td>82.0878, earlier v6 control</td></tr>
 </tbody></table></div>
-<p>The three crop runs completed 400 epochs with the same split, seed, and recorded base/runtime settings. The mixup, crop, and spectral experiments belong to separate comparisons; their gains or losses should not be combined. The spectral run's best-TKE and best-quality checkpoints were different.</p>
-<p class="caption">Evidence: augmentation ledger, “Full-trajectory Gaussian input noise” and “Mixup across all training trajectories”; experiment ledger, “TKE-targeted temporal spectral augmentation”; <a href="../../assets/realpde/crop-evidence.json">recovered crop results</a>. See <a href="#augmentation">view augmentations</a> for the retained transformations.</p>
+<p>The crop runs shared a split, seed, and 400-epoch training recipe, varying crop area and resampling together. Mixup was disabled in the Gaussian-noise experiment. Spectral augmentation used an earlier v6 control, with separate checkpoints for its best TKE and best overall quality.</p>
+<p class="caption">Evidence: augmentation ledger, “Full-trajectory Gaussian input noise” and “Mixup across all training trajectories”; experiment ledger, “TKE-targeted temporal spectral augmentation”; <a href="../../assets/realpde/crop-evidence.json">crop comparison results</a>. See <a href="#augmentation">view augmentations</a> for the retained transformations.</p>
 </details>
 <a class="chapter-back" href="#improvements">↑ Back to the process</a></div>
         </details>

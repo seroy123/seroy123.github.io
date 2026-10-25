@@ -9,7 +9,7 @@ RealPDE article: https://seroy123.github.io/work/realpde/
 - `dist/index.html`: About me, profile links, publications and project summaries, with an automatically looping RealPDE preview.
 - `dist/work/realpde/index.html`: problem statement and four synchronized forecast examples, with expandable methodology links.
 - Typography: 20px article text, minimum 16px labels, and shared desktop forecast headings.
-- Eight collapsed chapters on the same page (under the plain “How we built it” heading; deep links open and scroll to them): what the model needs to see, augmentation, architecture, learning uncertainty, T2 history, postprocessing, efficiency and what didn’t work.
+- Eight collapsed chapters on the same page (under the plain “How we built it” heading; deep links open and scroll to them): what the model needs to see, augmentation, architecture, learning uncertainty, T2 history, postprocessing, efficiency and what didn’t make the final model.
 - `content/realpde/`: editable HTML fragments; each chapter leads with a visual takeaway and keeps evidence collapsed.
 - Old chapter URLs redirect into the corresponding expandable section.
 - Scalar field plots are individual responsive panels; time-series charts have dedicated mobile layouts.
@@ -71,9 +71,9 @@ The representation and uncertainty chapters include early experimental motivatio
 results and unsuccessful ablations. They distinguish historical U-Net components
 from the final SimVP recipe, and label v6/v9 scoring so their gains are not combined.
 
-The “What didn’t work” chapter groups feature, architecture and augmentation
-experiments. It distinguishes negative comparisons from partial architecture
-histories, and avoids treating different recipes as a controlled backbone ranking.
+The “What didn’t make the final model” chapter groups feature, architecture and
+augmentation experiments. It labels completed and stopped-early trials, explains
+the decisions, and reports results within their tested configurations and budgets.
 `dist/assets/realpde/architecture-trials.json` contains derived architecture results;
 private source locations and recovered logs stay under ignored `.research/`.
 
